@@ -1,0 +1,51 @@
+NAME
+    DBIx::XHTML_Table - Create HTML tables from SQL queries
+
+INSTALL
+    Installation as usual:
+
+        perl Makefile.PL
+        make
+        make test
+        make install
+
+DESCRIPTION
+    See perldoc DBIx::XHTML_Table
+
+HISTORY
+	1.36 - doc updates
+	1.34 - exec_query() now accepts any DBI::st object
+	1.32 - forced lc end tag - more minor doc corrections
+	1.30 - minor doc corrections
+	1.28 - add_cols and drop_cols are now documented
+	1.26 - changed /^DBIx?::/ to simply /DBI/
+	1.24 - output tfoot before tbody, accecpt /^DBIx?::/ in constr.
+	1.22 - tweaked last patch and converting & to &amp;
+	1.20 - added extremely's patch to keep NULL complaints at bay
+	1.18 - named parent dir incorrectly in prev version
+	1.16 - incremented copyright date
+	1.14 - extremely minor fix in test.pl
+	1.12 - bug fix in _build_body_row()
+	1.10 - inheritable attributes, bux fix in set_col_colors()
+	1.01 - bug fix in _refinate()
+	1.00 - columns by number, fixed map_cell bug, experimenting with tests
+	0.99 - deprected modify_tag() for modify(), fixed header ucfirst bug
+	0.98 - styles as hashes, set_row_colors() uses styles now
+	0.97 - deprecated get_table() for output()
+	0.96 - added set_pk(), get_current_row(), and get_current_col()
+	     - deprecated map_col() for map_cell()
+	0.95 - added map_head(), constructor now accepts minor table config
+	0.90 - HEADER is now HEAD - FOOTER is now FOOT, <colgroup> fixed
+	0.85 - Fixed <tbody> bug introduced by tables sans groups
+	0.84 - Refactored the whole <tbody>, calc totals process
+	0.83 - Mark Mill's patch: added </tbody> and lower cased tags
+	0.82 - Fixed version number
+	0.81 - Fixed package name error, broke version number
+	0.80 - Initial release, broke package name convention
+
+AUTHOR
+    Jeffrey Hayes Anderson
+
+COPYRIGHT
+    Copyright (c) 2004 Jeffrey Hayes Anderson.
+	See source POD for additional copyright information.
