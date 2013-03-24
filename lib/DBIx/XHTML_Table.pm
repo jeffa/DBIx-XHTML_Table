@@ -1442,6 +1442,14 @@ Like add_cols, drop_cols goes against said 'philosophy', but it is here for
 the sake of TIMTWOTDI. Simply pass it an array ref that contains either the
 name or positions of the columns you want to drop.
 
+=item B<new>
+
+Things with the stuff.
+
+=item B<reset>
+
+Stuff with the things.
+
 =back
 
 =head1 TAG REFERENCE
