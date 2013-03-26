@@ -11,3 +11,10 @@ INSTALL
 
 DESCRIPTION
     See perldoc DBIx::XHTML_Table
+
+AUTHOR
+    Jeff Anderson
+
+COPYRIGHT
+    Copyright (c) 2013 Jeff Anderson.
+    See source POD for additional copyright information.
