@@ -448,6 +448,9 @@ sub _build_head_row {
 			$field = ucfirst $field unless $self->{'no_ucfirst'};
 		}
 
+        # bug 21761 "Special XML characters should be expressed as entities"
+        $field = $self->_xml_encode( $field );
+
 		$output .= $T.$T . _tag_it('th', $attribs, $field) . $N;
 	}
 
@@ -522,8 +525,8 @@ sub _build_body_row {
 		# suppress warnings AND keep 0 from becoming &nbsp;
 		$row->[$_] = '' unless defined($row->[$_]);
 
-		# escape ampersands ... should i escape more?
-		$row->[$_] =~ s/&/&amp;/g;
+		# bug 21761 "Special XML characters should be expressed as entities"
+		$row->[$_] = $self->_xml_encode( $row->[$_] );
 
 		my $cdata = ($row->[$_] =~ /^.+$/) 
 			? $row->[$_] 
@@ -706,6 +709,7 @@ sub _reset_fields_hash {
 # assigns a non-DBI supplied data table (2D array ref)
 sub _do_black_magic {
 	my ($self,$ref,$headers) = @_;
+    croak "bad data" unless ref( $ref->[0] ) eq 'ARRAY';
 	$self->{'fields_arry'} = $headers ? [@$headers] : [ map { lc } @{ shift @$ref } ];
 	$self->{'fields_hash'} = $self->_reset_fields_hash();
 	$self->{'rows'}        = $ref;

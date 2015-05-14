@@ -3,7 +3,7 @@ use strict;
 use warnings FATAL => 'all';
 use Test::More;
 
-plan tests => 7;
+plan tests => 10;
 
 use lib 'lib';
 use_ok 'DBIx::XHTML_Table';
@@ -45,3 +45,17 @@ is $table->output( $attr ),
     '<table><thead><tr><th>z2</th><th>H2</th></tr></thead><tfoot><tr><th>&nbsp;</th><th>3</th></tr></tfoot><tbody><tr><td style="background: #d0d0d0;">foo</td><td style="background: #f0f0f0;">1</td></tr><tr><td style="background: #d0d0d0;">&nbsp;</td><td style="background: #f0f0f0;">2</td></tr></tbody></table>',
     'color cells',
 ;
+
+# bug 21761
+$table = new_ok 'DBIx::XHTML_Table', [[ ['<"&>'], ['<"&>'] ]];
+is $table->output( $attr ),
+    '<table><thead><tr><th>&lt;&quot;&amp;&gt;</th></tr></thead><tbody><tr><td>&lt;&quot;&amp;&gt;</td></tr></tbody></table>',
+    'escape XML entities',
+;
+
+$table->map_head( sub{ 'new' }, '<"&>' );
+is $table->output( $attr ),
+    '<table><thead><tr><th>new</th></tr></thead><tbody><tr><td>&lt;&quot;&amp;&gt;</td></tr></tbody></table>',
+    'headers retain orig values',
+;
+
