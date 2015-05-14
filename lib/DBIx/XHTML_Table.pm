@@ -113,7 +113,7 @@ sub modify {
 
 	# apply attributes to specified columns
 	if (ref $attribs eq 'HASH') {
-		$cols ||= 'global';
+		$cols = 'global' unless defined( $cols) && length( $cols );
 		$cols = $self->_refinate($cols);
 
 		while (my($attr,$val) = each %$attribs) {
