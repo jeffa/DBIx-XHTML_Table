@@ -1,5 +1,8 @@
 Revision history for Perl extension DBIx::XHTML_Table.
 
+1.38
+    - using .md for readme
+
 1.37
     - using Module::Starter and Module::Build
     - added to github 
