@@ -528,9 +528,9 @@ sub _build_body_row {
 		# bug 21761 "Special XML characters should be expressed as entities"
 		$row->[$_] = $self->_xml_encode( $row->[$_] );
 
-		my $cdata = ($row->[$_] =~ /^.+$/) 
-			? $row->[$_] 
-			: $self->{'null_value'}
+		my $cdata = ($row->[$_] =~ /^\s+$/) 
+			? $self->{'null_value'}
+			: $row->[$_] 
 		;
 
 		$self->{'current_col'} = $name;
