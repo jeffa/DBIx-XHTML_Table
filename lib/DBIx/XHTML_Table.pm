@@ -654,7 +654,7 @@ sub _total_chunk {
 		}	
 	}
 
-	return [ map { defined $totals{$_} ? $totals{$_} : undef } sort (0..$self->get_col_count() - 1) ];
+	return [ map { defined $totals{$_} ? $totals{$_} : undef } (0 .. $self->get_col_count() - 1) ];
 }
 
 # uses %ESCAPES to convert the '4 Horsemen' of XML
