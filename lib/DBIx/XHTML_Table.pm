@@ -728,7 +728,7 @@ __END__
 
 =head1 NAME
 
-DBIx::XHTML_Table - SQL query result set to HTML table.
+DBIx::XHTML_Table - SQL query result set to XHTML table.
 
 =head1 SYNOPSIS
 
