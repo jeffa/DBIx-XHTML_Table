@@ -2,7 +2,7 @@ package DBIx::XHTML_Table;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '1.39';
+$VERSION = '1.40';
 
 use DBI;
 use Carp;
@@ -767,14 +767,15 @@ where the concern for presentation and logic seperation is overkill.
 Providing logic or editable data is beyond the scope of this module,
 but it is capable of doing such.
 
-=head1 HOME PAGE
+=head1 WEBSITE
 
-The DBIx::XHTML_Table homepage is now available, but still under
-construction. A partially complete FAQ and Cookbook are available
-there, as well as the Tutorial, Download and Support info: 
+More documentation (tutorial, cookbook, FAQ, etc.) can be found at
 
   http://www.unlocalhost.com/XHTML_Table/
-  http://jeffa.perlmonk.org/XHTML_Table/
+
+=head1 GITHUB
+
+  https://github.com/jeffa/DBIx-XHTML_Table
 
 =head1 CONSTRUCTOR
 

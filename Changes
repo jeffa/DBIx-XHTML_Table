@@ -1,5 +1,8 @@
 Revision history for Perl extension DBIx::XHTML_Table.
 
+1.40
+    - corrected external sites in docs
+
 1.39
     - corrected MANIFEST
     - added DBI as makefile dependency 
