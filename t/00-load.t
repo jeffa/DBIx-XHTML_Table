@@ -2,12 +2,20 @@
 use 5.006;
 use strict;
 use warnings FATAL => 'all';
-use Test::More;
+use Test::More tests => 2;
 
-plan tests => 1;
+my $local_version = version_from_file( 'lib/DBIx/XHTML_Table.pm' );
 
-BEGIN {
-    use_ok( 'DBIx::XHTML_Table' ) || print "Bail out!\n";
+use_ok( 'DBIx::XHTML_Table', $local_version ) or print "Bail out!\n";
+
+is $DBIx::XHTML_Table::VERSION, $local_version, "correct version ($local_version)";
+
+sub version_from_file {
+    my $file = shift;
+    open FH, $file;
+    my ($version) = map {/'([0-9.]+)'/;$1} grep /our\s+\$VERSION/, <FH>;
+    close FH;
+    return $version;
 }
 
-diag( "Testing DBIx::XHTML_Table $DBIx::XHTML_Table::VERSION, Perl $], $^X" );
+#diag( "Testing DBIx::XHTML_Table $DBIx::XHTML_Table::VERSION, Perl $], $^X" );

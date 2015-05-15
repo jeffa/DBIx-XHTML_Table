@@ -1,8 +1,8 @@
 package DBIx::XHTML_Table;
 
 use strict;
-use vars qw($VERSION);
-$VERSION = '1.40';
+use warnings;
+our $VERSION = '1.40';
 
 use DBI;
 use Carp;
