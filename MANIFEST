@@ -1,9 +1,11 @@
 Changes
+ignore.txt
 lib/DBIx/XHTML_Table.pm
 Makefile.PL
 MANIFEST			This list of files
 readme.md
 t/00-load.t
-t/manifest.t
-t/pod-coverage.t
-t/pod.t
+t/01-run.t
+t/bug-11666.t
+t/bug-11681.t
+t/bug-21761.t
