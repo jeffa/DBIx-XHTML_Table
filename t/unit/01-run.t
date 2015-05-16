@@ -5,7 +5,6 @@ use Test::More;
 
 plan tests => 7;
 
-use lib 'lib';
 use_ok 'DBIx::XHTML_Table';
 
 my $attr = { no_indent => 1 };
