@@ -767,6 +767,20 @@ where the concern for presentation and logic seperation is overkill.
 Providing logic or editable data is beyond the scope of this module,
 but it is capable of doing such.
 
+DBIx::XHTML_Table is over one decade old now and has been in
+need of a rewrite for a long time. Two new modules are being
+developed to handle the most of the current responsibilites. This
+module will not be retired, but usage of the following is encouraged
+once they have both matured to version 1.0 and greater:
+
+=over 4
+
+=item * L<DBIx::HTML>
+
+=item * L<Spreadsheet::HTML>
+
+=back
+
 =head1 WEBSITE
 
 More documentation (tutorial, cookbook, FAQ, etc.) can be found at
