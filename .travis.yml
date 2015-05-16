@@ -1,6 +1,6 @@
 language: perl
 before_install:
-    - cpanm --notest DBI
+    - cpanm --notest DBI DBD::CSV Test::Pod Test::Pod::Coverage
 perl:
   - "5.20"
   - "5.18"
