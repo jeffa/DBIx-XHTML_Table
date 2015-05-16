@@ -1,11 +1,8 @@
 #!perl -T
 use strict;
 use warnings FATAL => 'all';
-use Test::More;
-
-plan tests => 7;
-
-use_ok 'DBIx::XHTML_Table';
+use DBIx::XHTML_Table;
+use Test::More tests => 6;
 
 my $attr = { no_indent => 1 };
 my @data = (
