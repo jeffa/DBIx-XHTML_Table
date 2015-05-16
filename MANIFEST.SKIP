@@ -1,3 +1,7 @@
+.git
+.travis.yml
+ignore.txt
+t/author/*
 Makefile
 Makefile.old
 Build
@@ -16,3 +20,4 @@ pod2htm*.tmp
 pm_to_blib
 DBIx-XHTML_Table-*
 DBIx-XHTML_Table-*.tar.gz
+MANIFEST.SKIP
