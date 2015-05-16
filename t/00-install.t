@@ -17,5 +17,3 @@ sub version_from_file {
     close FH;
     return $version;
 }
-
-#diag( "Testing DBIx::XHTML_Table $DBIx::XHTML_Table::VERSION, Perl $], $^X" );
