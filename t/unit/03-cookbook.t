@@ -7,9 +7,8 @@ use Test::More;
 use Data::Dumper;
 use FindBin qw($Bin);
 
-if ($ARGV[0] && $DBIx::XHTML_Table::VERSION ne '1.36') {
-    plan skip_all => "must use DBIx::XHTML_Table v1.36 to generate tests";
-}
+plan skip_all => "must use DBIx::XHTML_Table v1.36 to generate tests"
+    if $ARGV[0] && $DBIx::XHTML_Table::VERSION ne '1.36';
 
 =for usage
 Generate tests first:
@@ -33,21 +32,26 @@ my $exp_dir = "$Bin/../data/expected";
 
 for (0 .. $#tests) {
     my %args = %{ $tests[$_] };
+    $args{mod_args} ||= [];
+    $args{out_args} ||= {};
+
     my $file = sprintf( '%s/%03d-%s.html', $exp_dir, $_ + 1, $args{test} );
+
+    # execute the modifications
+    $table = init_table() if $args{init};
+    $args{mods}->( @{$args{mod_args}} );
 
     if ($ARGV[0]) {
         # generate tests
         open FH, '>', $file or die "Can't write $file: $!\n";
-        $args{modifications}->( );
-        print FH $table->output;
+        print FH $table->output( %{$args{out_args}} );
         print STDOUT "wrote $file\n";
 
     } else {
         # run tests
         open FH, $file or die "Can't read $file: $!\n";
         my $expected = do{ local $/; <FH> };
-        $args{modifications}->();
-        is $table->output, $expected, $args{test};
+        is $table->output( %{$args{out_args}} ), $expected, $args{test};
     }
 
     close FH;
@@ -73,7 +77,34 @@ sub init_table {
 sub get_tests { return (
     {
         test => "no-modifications",
-        modifications => sub { },
+        mods => sub { },
+    },
+    {
+        test => "sorted-attributes",
+        mod_args => [ v => { z => 1, b => 2 }, b => { w => 5, m => 3, a => 1 } ],
+        mods => sub { $table->modify( table => {@_} ) },
+    },
+    {
+        test => "table-border",
+        mod_args => [ border => 5 ],
+        mods => sub { $table->modify( table => {@_} ) },
+    },
+    {
+        init => 1,
+        test => "table-inline-css",
+        mod_args => [ style => { 'border-style' => 'outset', 'border-width' => '5px' } ],
+        mods => sub { $table->modify( table => {@_} ) },
+    },
+    {
+        test => "table-and-cell-inline-css",
+        mod_args => [
+            { style => { 'border-style' => 'outset', 'border-width' => 'thin' } },
+            { style => { 'border-style' => 'inset',  'border-width' => 'thin' } },
+        ],
+        mods => sub {
+            $table->modify( table => $_[0] );
+            $table->modify( $_ => $_[1] ) for qw(th td);
+        },
     },
 ) }
 
