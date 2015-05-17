@@ -1,9 +1,10 @@
 Revision history for Perl extension DBIx::XHTML_Table.
 
 1.42
+    - fixed bug #6962 (Support for mixed case field names returned by the SQL query)
 
 1.41
-    - fixed MANIFEST
+    - fixed critical bug #104484 (Makefile.PL or Build.PL) :(
 
 1.40
     - restructed tests
@@ -15,10 +16,10 @@ Revision history for Perl extension DBIx::XHTML_Table.
 
 1.38
     - using .md for readme
-    - fixed bug #104380
-    - fixed bug #21761
-    - fixed bug #11681
-    - fixed bug #11666
+    - fixed bug #104380 (cpan / cpanm install hangs)
+    - fixed bug #21761 (Special XML characters should be expressed as entities)
+    - fixed bug #11681 (Possible problem with modify() on column number 0)
+    - fixed bug #11666 (cell data containing newlines does not render)
 
 1.37
     - using Module::Starter and Module::Build
