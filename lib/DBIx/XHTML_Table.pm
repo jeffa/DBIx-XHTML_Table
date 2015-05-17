@@ -67,7 +67,7 @@ sub exec_query {
 	carp $@ and return undef if $@;
 
 	# store the results
-	$self->{'fields_arry'} = [ map { lc }         @{$self->{'sth'}->{'NAME'}} ];
+	$self->{'fields_arry'} = [ map { lc } @{$self->{'sth'}->{'NAME'}} ];
 	$self->{'fields_hash'} = $self->_reset_fields_hash();
 	$self->{'rows'}        = $self->{'sth'}->fetchall_arrayref();
 	carp "can't call exec_query(): no data was returned from query" unless @{$self->{'rows'}};
@@ -152,7 +152,16 @@ sub map_head {
 	carp "map_head() is being ignored - no data" and return $self unless $self->{'rows'};
 
 	$cols = $self->_refinate($cols);
-	$self->{'map_head'}->{$_} = $sub for @$cols;
+    for (@$cols) {
+        my $key;
+        if (defined $self->{'fields_hash'}->{$_}) {
+            $key = $_;
+        } elsif( defined $self->{'fields_hash'}->{lc $_}) {
+            $key = lc $_;
+        }
+        next unless $key;
+        $self->{'map_head'}->{$key} = $sub;
+    }
 
 	return $self;
 }
