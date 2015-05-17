@@ -127,7 +127,7 @@ sub modify {
 
 		# there is only one caption - no need to rotate attribs
 		if (ref $cols->{'style'} eq 'HASH') {
-			$cols->{'style'} = join('; ',map { "$_: ".$cols->{'style'}->{$_} } keys %{$cols->{'style'}}) . ';';
+			$cols->{'style'} = join('; ',map { "$_: ".$cols->{'style'}->{$_} } sort keys %{$cols->{'style'}}) . ';';
 		}
 
 		$self->{'global'}->{$tag."_attribs"} = $cols;
@@ -620,7 +620,8 @@ sub _tag_it {
 	my $text = "<\L$name\E";
 
 	# build the attributes if any - skip blank vals
-	while(my ($k,$v) = each %{$attribs}) {
+    for my $k (sort keys %{$attribs}) {
+        my $v = $attribs->{$k};
 		if (ref $v eq 'HASH') {
 			$v = join('; ', map { 
 				my $attrib = $_;
@@ -628,7 +629,7 @@ sub _tag_it {
 					? _rotate($v->{$_}) 
 					: $v->{$_};
 				join(': ',$attrib,$value||'');
-			} keys %$v) . ';';
+			} sort keys %$v) . ';';
 		}
 		$v = _rotate($v) if (ref $v eq 'ARRAY');
 		$text .= qq| \L$k\E="$v"| unless $v =~ /^$/;
