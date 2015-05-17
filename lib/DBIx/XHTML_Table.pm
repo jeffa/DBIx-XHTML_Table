@@ -158,6 +158,13 @@ sub map_head {
             $key = $_;
         } elsif( defined $self->{'fields_hash'}->{lc $_}) {
             $key = lc $_;
+        } else {
+            SEARCH: for my $k (keys %{ $self->{'fields_hash'} }) {
+                if (lc( $k ) eq lc( $_ )) {
+                    $key = $k;
+                    last SEARCH;
+                }
+            }
         }
         next unless $key;
         $self->{'map_head'}->{$key} = $sub;
@@ -453,8 +460,8 @@ sub _build_head_row {
 		if (my $sub = $self->{'map_head'}->{$field}) {
 			$field = $sub->($field);
 		}
-		else {
-			$field = ucfirst $field unless $self->{'no_ucfirst'};
+		elsif (!$self->{'no_ucfirst'}) {
+			$field = ucfirst( lc( $field ) );
 		}
 
         # bug 21761 "Special XML characters should be expressed as entities"
@@ -720,7 +727,7 @@ sub _reset_fields_hash {
 sub _do_black_magic {
 	my ($self,$ref,$headers) = @_;
     croak "bad data" unless ref( $ref->[0] ) eq 'ARRAY';
-	$self->{'fields_arry'} = $headers ? [@$headers] : [ map { lc } @{ shift @$ref } ];
+	$self->{'fields_arry'} = $headers ? [@$headers] : [ @{ shift @$ref } ];
 	$self->{'fields_hash'} = $self->_reset_fields_hash();
 	$self->{'rows'}        = $ref;
 }
