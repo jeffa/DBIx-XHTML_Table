@@ -1,5 +1,0 @@
-Makefile
-.git
-t/author
-MANIFEST.SKIP
-.travis.yml
