@@ -25,10 +25,12 @@ eval "use DBD::CSV";
 plan skip_all => "DBD::CSV required" if $@;
 
 my @tests = get_tests();
-plan tests => scalar( @tests ) unless @ARGV;
+plan tests => scalar( @tests ) + 1 unless @ARGV;
 
 our $table = init_table();
 my $exp_dir = "$Bin/../data/expected";
+
+is $DBIx::XHTML_Table::VERSION, $DBIx::XHTML_Table::VERSION, "this is version $DBIx::XHTML_Table::VERSION";
 
 for (0 .. $#tests) {
     my %args = %{ $tests[$_] };
@@ -92,7 +94,6 @@ sub get_tests { return (
         mods => sub { $table->modify( table => {@_} ) },
     },
     {
-        init => 1,
         test => "table-inline-css",
         mod_args => [ style => { 'border-style' => 'outset', 'border-width' => '5px' } ],
         mods => sub { $table->modify( table => {@_} ) },
@@ -108,6 +109,29 @@ sub get_tests { return (
             $table->modify( $_ => $_[1] ) for qw(th td);
         },
     },
+    {
+        test => "align-th-right",
+        mod_args => [ style => 'text-align: right' ],
+        mods => sub { $table->modify( th => {@_} ) },
+    },
+    {
+        test => "add-caption",
+        mod_args => [],
+        mods => sub { $table->modify( caption => 'Hello World' ) },
+    },
+    {
+        test => "add-caption-css",
+        mod_args => [ style => 'color: green; font-style: italic' ],
+        mods => sub { $table->modify( caption => 'Hello World', {@_} ) },
+    },
+    {
+        test => "add-caption-border",
+        mod_args => [ style => { 'font-size' => 'x-large', 'border-style' => 'double' } ],
+        mods => sub { $table->modify( caption => 'Hello Border', {@_} ) },
+    },
+    {
+        test => "put-caption-at-bottom",
+        mod_args => [ align => 'bottom', style => 'font-size: x-large' ],
+        mods => sub { $table->modify( caption => 'Hello Border', {@_} ) },
+    },
 ) }
-
-

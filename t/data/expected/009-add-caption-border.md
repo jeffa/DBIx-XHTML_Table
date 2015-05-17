@@ -1,12 +1,13 @@
 1.36
 <table b="a: 1; m: 3; w: 5;" border="5" style="border-style: outset; border-width: thin;" v="b: 2; z: 1;">
+	<caption style="border-style: double; font-size: x-large;">Hello Border</caption>
 	<thead>
 	<tr>
-		<th style="border-style: inset; border-width: thin;">Foo</th>
-		<th style="border-style: inset; border-width: thin;">Bar</th>
-		<th style="border-style: inset; border-width: thin;">Baz</th>
-		<th style="border-style: inset; border-width: thin;">Qux</th>
-		<th style="border-style: inset; border-width: thin;">Quf</th>
+		<th style="text-align: right">Foo</th>
+		<th style="text-align: right">Bar</th>
+		<th style="text-align: right">Baz</th>
+		<th style="text-align: right">Qux</th>
+		<th style="text-align: right">Quf</th>
 	</tr>
 	</thead>
 	<tbody>
