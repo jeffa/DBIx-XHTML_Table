@@ -44,14 +44,16 @@ for (0 .. $#tests) {
     if ($ARGV[0]) {
         # generate tests
         open FH, '>', $file or die "Can't write $file: $!\n";
+        print FH $DBIx::XHTML_Table::VERSION, $/;
         print FH $table->output( %{$args{out_args}} );
         print STDOUT "wrote $file\n";
 
     } else {
         # run tests
         open FH, $file or die "Can't read $file: $!\n";
+        chomp( my $from_version = <FH> );
         my $expected = do{ local $/; <FH> };
-        is $table->output( %{$args{out_args}} ), $expected, $args{test};
+        is $table->output( %{$args{out_args}} ), $expected, "$args{test} (generated from $from_version)";
     }
 
     close FH;
