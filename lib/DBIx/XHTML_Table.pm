@@ -159,7 +159,7 @@ sub map_head {
         } elsif( defined $self->{'fields_hash'}->{lc $_}) {
             $key = lc $_;
         } else {
-            SEARCH: for my $k (keys %{ $self->{'fields_hash'} }) {
+            SEARCH: for my $k (sort keys %{ $self->{'fields_hash'} }) {
                 if (lc( $k ) eq lc( $_ )) {
                     $key = $k;
                     last SEARCH;
