@@ -2,7 +2,7 @@ package DBIx::XHTML_Table;
 
 use strict;
 use warnings;
-our $VERSION = '1.41';
+our $VERSION = '1.42';
 
 use DBI;
 use Carp;
