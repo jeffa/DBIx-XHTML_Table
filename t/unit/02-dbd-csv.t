@@ -3,10 +3,11 @@ use 5.006;
 use strict;
 use warnings FATAL => 'all';
 use DBIx::XHTML_Table;
-use Test::More tests => 2;
+use Test::More;
 
 eval "use DBD::CSV";
 plan skip_all => "DBD::CSV required" if $@;
+plans tests => 2;
 
 my $dbh = DBI->connect ("dbi:CSV:", undef, undef, {
     f_ext      => ".csv/r",
