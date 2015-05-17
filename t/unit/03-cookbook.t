@@ -40,7 +40,7 @@ for (0 .. $#tests) {
     my $file = sprintf( '%s/%03d-%s.md', $exp_dir, $_ + 1, $args{test} );
 
     # execute the modifications
-    $table = init_table() if $args{init};
+    $table = init_table() unless $args{no_init};
     $args{mods}->( @{$args{mod_args}} );
 
     if ($ARGV[0]) {

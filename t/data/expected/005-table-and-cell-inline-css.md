@@ -1,5 +1,5 @@
 1.36
-<table b="a: 1; m: 3; w: 5;" border="5" style="border-style: outset; border-width: thin;" v="b: 2; z: 1;">
+<table style="border-style: outset; border-width: thin;">
 	<thead>
 	<tr>
 		<th style="border-style: inset; border-width: thin;">Foo</th>

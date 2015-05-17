@@ -1,5 +1,5 @@
 1.36
-<table b="a: 1; m: 3; w: 5;" border="5" style="border-style: outset; border-width: thin;" v="b: 2; z: 1;">
+<table>
 	<thead>
 	<tr>
 		<th style="text-align: right">Foo</th>
@@ -11,32 +11,32 @@
 	</thead>
 	<tbody>
 	<tr>
-		<td style="border-style: inset; border-width: thin;">a</td>
-		<td style="border-style: inset; border-width: thin;">1</td>
-		<td style="border-style: inset; border-width: thin;">5</td>
-		<td style="border-style: inset; border-width: thin;">nine</td>
-		<td style="border-style: inset; border-width: thin;">foo</td>
+		<td>a</td>
+		<td>1</td>
+		<td>5</td>
+		<td>nine</td>
+		<td>foo</td>
 	</tr>
 	<tr>
-		<td style="border-style: inset; border-width: thin;">a</td>
-		<td style="border-style: inset; border-width: thin;">2</td>
-		<td style="border-style: inset; border-width: thin;">6</td>
-		<td style="border-style: inset; border-width: thin;">ten</td>
-		<td style="border-style: inset; border-width: thin;">bar</td>
+		<td>a</td>
+		<td>2</td>
+		<td>6</td>
+		<td>ten</td>
+		<td>bar</td>
 	</tr>
 	<tr>
-		<td style="border-style: inset; border-width: thin;">b</td>
-		<td style="border-style: inset; border-width: thin;">3</td>
-		<td style="border-style: inset; border-width: thin;">7</td>
-		<td style="border-style: inset; border-width: thin;">11</td>
-		<td style="border-style: inset; border-width: thin;">baz</td>
+		<td>b</td>
+		<td>3</td>
+		<td>7</td>
+		<td>11</td>
+		<td>baz</td>
 	</tr>
 	<tr>
-		<td style="border-style: inset; border-width: thin;">b</td>
-		<td style="border-style: inset; border-width: thin;">4</td>
-		<td style="border-style: inset; border-width: thin;">8</td>
-		<td style="border-style: inset; border-width: thin;">12</td>
-		<td style="border-style: inset; border-width: thin;">qux</td>
+		<td>b</td>
+		<td>4</td>
+		<td>8</td>
+		<td>12</td>
+		<td>qux</td>
 	</tr>
 	</tbody>
 </table>

@@ -1,5 +1,5 @@
 1.36
-<table b="a: 1; m: 3; w: 5;" border="5" v="b: 2; z: 1;">
+<table border="5">
 	<thead>
 	<tr>
 		<th>Foo</th>
