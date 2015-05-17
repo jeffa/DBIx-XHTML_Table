@@ -7,7 +7,7 @@ use Test::More;
 
 eval "use DBD::CSV";
 plan skip_all => "DBD::CSV required" if $@;
-plans tests => 2;
+plan tests => 2;
 
 my $dbh = DBI->connect ("dbi:CSV:", undef, undef, {
     f_ext      => ".csv/r",
