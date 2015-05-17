@@ -11,7 +11,7 @@ plan skip_all => "must use DBIx::XHTML_Table v1.36 to generate tests"
     if $ARGV[0] && $DBIx::XHTML_Table::VERSION ne '1.36';
 
 =for usage
-Generate tests first:
+Generate data files first:
     !perl % 1  
 
 Then run tests as usual:
@@ -35,7 +35,7 @@ for (0 .. $#tests) {
     $args{mod_args} ||= [];
     $args{out_args} ||= {};
 
-    my $file = sprintf( '%s/%03d-%s.html', $exp_dir, $_ + 1, $args{test} );
+    my $file = sprintf( '%s/%03d-%s.md', $exp_dir, $_ + 1, $args{test} );
 
     # execute the modifications
     $table = init_table() if $args{init};
