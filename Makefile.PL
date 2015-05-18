@@ -24,6 +24,7 @@ WriteMakefile(
 );
 
 # replace standard test harness with our own when 'make test' is invoked
+# this is the only way i know to force 'make test' to run recursively
 package MY;
 sub test {
     my $inherited = shift->SUPER::test(@_);
