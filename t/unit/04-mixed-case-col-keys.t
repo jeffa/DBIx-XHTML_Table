@@ -9,7 +9,7 @@ use DBIx::XHTML_Table;
 eval "use HTML::TableExtract";
 plan skip_all => "HTML::TableExtract required" if $@;
 
-plan tests => 37;
+plan tests => 40;
 
 my ( $table, @headers, @data );
 my $nbsp = chr( 160 );
@@ -137,16 +137,34 @@ my $nbsp = chr( 160 );
     $table = DBIx::XHTML_Table->new( [@data] );
     $table->calc_totals( qw(HD_twO) );
     is_deeply extract( $table, 1 ), [$nbsp,3,$nbsp],      "calc totals - by exact col key";
-}
 
-#    @data = (
-#        [@headers],
-#        [ 'a', 1, 1 ],
-#        [ 'a', 2, 2 ],
-#        [ 'b', 3, 3 ],
-#        [ 'b', 4, 4 ],
-#    );
-#    $table = DBIx::XHTML_Table->new( [@data] );
+    @data = (
+        [@headers],
+        [ 'a', 5, 5 ],
+        [ 'a', 5, 5 ],
+        [ 'a', 5, 5 ],
+        [ 'b', 5, 5 ],
+        [ 'b', 5, 5 ],
+        [ 'b', 5, 5 ],
+    );
+
+    $table = DBIx::XHTML_Table->new( [@data] );
+    $table->set_group( 0 );
+    $table->calc_totals( );
+    $table->calc_subtotals( );
+    is_deeply extract( $table, 1 ), [$nbsp,30,30],      "subtotals by col index - correct totals";
+    $table = DBIx::XHTML_Table->new( [@data] );
+    $table->set_group( 0 );
+    $table->calc_totals( );
+    $table->calc_subtotals( );
+    is_deeply extract( $table, 5 ), [$nbsp,15,15],      "subtotals by col index - correct subtotals 1";
+    $table = DBIx::XHTML_Table->new( [@data] );
+    $table->set_group( 0 );
+    $table->calc_totals( );
+    $table->calc_subtotals( );
+    is_deeply extract( $table, 9 ), [$nbsp,15,15],      "subtotals by col index - correct subtotals 2";
+
+}
 
 
 
@@ -156,8 +174,7 @@ sub extract {
     my $extract = HTML::TableExtract->new( keep_headers => 1 );
     $extract->parse( $table->output );
     if (defined $row) {
-        my $row = @{[ $extract->rows ]}[$row];
-        return $row;
+        return @{[ $extract->rows ]}[$row];
     } elsif (defined $col) {
         # TODO: if needed
     } else {
