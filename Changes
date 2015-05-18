@@ -1,6 +1,10 @@
 Revision history for Perl extension DBIx::XHTML_Table.
 
+1.44
+    - 
+
 1.43
+    - fixed distro manifest
 
 1.42
     - fixed bug #6962 (Support for mixed case field names returned by the SQL query)
