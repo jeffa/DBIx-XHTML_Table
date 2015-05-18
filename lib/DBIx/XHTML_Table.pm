@@ -67,7 +67,7 @@ sub exec_query {
 	carp $@ and return undef if $@;
 
 	# store the results
-	$self->{'fields_arry'} = [ map { lc } @{$self->{'sth'}->{'NAME'}} ];
+	$self->{'fields_arry'} = [ @{$self->{'sth'}->{'NAME'}} ];
 	$self->{'fields_hash'} = $self->_reset_fields_hash();
 	$self->{'rows'}        = $self->{'sth'}->fetchall_arrayref();
 	carp "can't call exec_query(): no data was returned from query" unless @{$self->{'rows'}};
@@ -142,7 +142,23 @@ sub map_cell {
 	carp "map_cell() is being ignored - no data" and return $self unless $self->{'rows'};
 
 	$cols = $self->_refinate($cols);
-	$self->{'map_cell'}->{$_} = $sub for @$cols;
+    for (@$cols) {
+        my $key;
+        if (defined $self->{'fields_hash'}->{$_}) {
+            $key = $_;
+        } elsif( defined $self->{'fields_hash'}->{lc $_}) {
+            $key = lc $_;
+        } else {
+            SEARCH: for my $k (sort keys %{ $self->{'fields_hash'} }) {
+                if (lc( $k ) eq lc( $_ )) {
+                    $key = $k;
+                    last SEARCH;
+                }
+            }
+        }
+        next unless $key;
+        $self->{'map_cell'}->{$key} = $sub;
+    }
 	return $self;
 }
 
@@ -182,13 +198,29 @@ sub add_col_tag {
 }
 
 sub calc_totals {
-
 	my ($self,$cols,$mask) = @_;
 	return undef unless $self->{'rows'};
 
 	$self->{'totals_mask'} = $mask;
 	$cols = $self->_refinate($cols);
-	my @indexes = map { $self->{'fields_hash'}->{lc $_} } @$cols;
+
+	my @indexes;
+    for (@$cols) {
+        my $index;
+        if (exists $self->{'fields_hash'}->{$_}) {
+            $index = $self->{'fields_hash'}->{$_};    
+        } elsif (exists $self->{'fields_hash'}->{lc $_}) {
+            $index = $self->{'fields_hash'}->{lc $_};    
+        } else {
+            SEARCH: for my $k (sort keys %{ $self->{'fields_hash'} }) {
+                if (lc( $k ) eq lc( $_ )) {
+                    $index = $self->{'fields_hash'}->{$k};
+                    last SEARCH;
+                }
+            }
+        }
+        push @indexes, $index;
+    }
 
 	$self->{'totals'} = $self->_total_chunk($self->{'rows'},\@indexes);
 
@@ -196,14 +228,29 @@ sub calc_totals {
 }
 
 sub calc_subtotals {
-
 	my ($self,$cols,$mask,$nodups) = @_;
-
 	return undef unless $self->{'rows'};
 
 	$self->{'subtotals_mask'} = $mask;
 	$cols = $self->_refinate($cols);
-	my @indexes = map { $self->{'fields_hash'}->{lc $_} } @$cols;
+
+	my @indexes;
+    for (@$cols) {
+        my $index;
+        if (exists $self->{'fields_hash'}->{$_}) {
+            $index = $self->{'fields_hash'}->{$_};    
+        } elsif (exists $self->{'fields_hash'}->{lc $_}) {
+            $index = $self->{'fields_hash'}->{lc $_};    
+        } else {
+            SEARCH: for my $k (sort keys %{ $self->{'fields_hash'} }) {
+                if (lc( $k ) eq lc( $_ )) {
+                    $index = $self->{'fields_hash'}->{$k};
+                    last SEARCH;
+                }
+            }
+        }
+        push @indexes, $index;
+    }
 
 	my $beg = 0;
 	foreach my $end (@{$self->{'body_breaks'}}) {
@@ -693,6 +740,7 @@ sub _rotate {
 # always returns an array ref
 sub _refinate {
 	my ($self,$ref) = @_;
+    $ref = undef if ref($ref) eq 'ARRAY' && scalar( @$ref ) < 1;
 	$ref = [@{$self->{'fields_arry'}}] unless defined $ref;
 	$ref = [$ref] unless ref $ref eq 'ARRAY';
 	return [map {$_ =~ /^\d+$/ ? $self->_lookup_name($_) || $_ : $_} @$ref];
