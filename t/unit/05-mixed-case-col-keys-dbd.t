@@ -49,8 +49,6 @@ my $nbsp = chr( 160 );
 }
 
 {   # headers - mixed case duplicates
-SKIP: {
-    skip "these are broken", 6;
     $query = 'select * from table2'; 
 
     $table = DBIx::XHTML_Table->new( $dbh )->exec_query( $query );
@@ -60,6 +58,8 @@ SKIP: {
     $table->map_head( sub { lc shift } );
     is_deeply extract( $table, 0 ), [qw(hd_one hd_one hd_two hd_two)],     "all headers changed";
 
+SKIP: {
+    skip "these are broken", 4;
     $table = DBIx::XHTML_Table->new( $dbh )->exec_query( $query );
     $table->map_head( sub { uc shift }, [ 1 ] );
     is_deeply extract( $table, 0 ), [qw(Hd_one HD_ONE Hd_two Hd_two)],     "header changed by col index";
@@ -187,8 +187,6 @@ SKIP: {
     $table = make_with_subtotals( $query, group => 'GRP_2' );
     is_deeply extract( $table, 1 ), [$nbsp,30,30,$nbsp,60,60],      "2nd group subtotals by col key - correct totals";
 
-SKIP: {
-    skip "lower case no longer works", 5;
     $table = make_with_subtotals( $query, group => 'GRP_2' );
     is_deeply extract( $table, 6 ), [$nbsp,20,20,$nbsp,40,40],      "2nd group subtotals by col key - correct subtotals 1";
 
@@ -203,7 +201,6 @@ SKIP: {
 
     $table = make_with_subtotals( $query, group => 'grp_2' );
     is_deeply extract( $table, 9 ), [$nbsp,10,10,$nbsp,20,20],      "2nd group subtotals by matched lc col key - correct subtotals 2";
-    };
 }
 
 

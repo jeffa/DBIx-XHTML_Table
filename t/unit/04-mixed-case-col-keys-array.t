@@ -194,8 +194,6 @@ my $nbsp = chr( 160 );
     $table = make_with_subtotals( [@data], group => 'GRP_2' );
     is_deeply extract( $table, 9 ), [$nbsp,10,10,$nbsp,20,20],      "2nd group subtotals by col key - correct subtotals 2";
 
-SKIP: {
-    skip "lower case no longer works", 3;
     $table = make_with_subtotals( [@data], group => 'grp_2' );
     is_deeply extract( $table, 1 ), [$nbsp,30,30,$nbsp,60,60],      "2nd group subtotals by matched lc col key - correct totals";
 
@@ -204,7 +202,6 @@ SKIP: {
 
     $table = make_with_subtotals( [@data], group => 'grp_2' );
     is_deeply extract( $table, 9 ), [$nbsp,10,10,$nbsp,20,20],      "2nd group subtotals by matched lc col key - correct subtotals 2";
-    };
 }
 
 
