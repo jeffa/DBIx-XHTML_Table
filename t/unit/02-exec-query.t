@@ -11,7 +11,7 @@ plan tests => 2;
 
 my $dbh = DBI->connect ("dbi:CSV:", undef, undef, {
     f_ext      => ".csv/r",
-    f_dir      => "t/data",
+    f_dir      => "t/data/unit/02/",
     RaiseError => 1,
 });
 
