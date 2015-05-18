@@ -311,10 +311,25 @@ sub set_col_colors {
 sub set_group {
 	my ($self,$group,$nodup,$value) = @_;
 	$self->{'nodup'} = $value || $self->{'null_value'} if $nodup;
-	$self->{'group'} = $group = $group =~ /^\d+$/ 
-		? $self->_lookup_name($group) || $group : $group;
 
-	my $index = $self->{'fields_hash'}->{$group} || 0;
+    my $index;
+    if ($group =~ /^\d+$/) {
+        $index = $group;
+    } elsif (exists $self->{'fields_hash'}->{$group}) {
+        $index = $self->{'fields_hash'}->{$group};    
+	    $self->{'group'} = $group;
+    } elsif (exists $self->{'fields_hash'}->{lc $group}) {
+        $index = $self->{'fields_hash'}->{lc $group};    
+	    $self->{'group'} = lc $group;
+    } else {
+        SEARCH: for my $k (sort keys %{ $self->{'fields_hash'} }) {
+            if (lc( $k ) eq lc( $group )) {
+                $index = $self->{'fields_hash'}->{$k};
+	            $self->{'group'} = $k;
+                last SEARCH;
+            }
+        }
+    }
 
 	# initialize the first 'repetition'
 	my $rep = $self->{'rows'}->[0]->[$index];
