@@ -1,6 +1,7 @@
 #!perl -T
 use strict;
 use warnings FATAL => 'all';
+use utf8;
 use Test::More;
 use Data::Dumper;
 use DBIx::XHTML_Table;
@@ -11,6 +12,7 @@ plan skip_all => "HTML::TableExtract required" if $@;
 plan tests => 37;
 
 my ( $table, @headers, @data );
+my $nbsp = chr( 160 );
 
 {   # headers - no mixed case duplicates
     @headers = qw(HD_onE HD_twO hd_three );
@@ -118,27 +120,24 @@ my ( $table, @headers, @data );
 
     $table = DBIx::XHTML_Table->new( [@data] );
     $table->calc_totals( 1 );
-
-SKIP: {
-    skip "&nbsp; seems mangled by HTML::TablExtract", 5;
-    is_deeply extract( $table, 1 ), [undef,3,undef],      "calc totals - by one col index";
+    is_deeply extract( $table, 1 ), [$nbsp,3,$nbsp],      "calc totals - by one col index";
 
     $table = DBIx::XHTML_Table->new( [@data] );
     $table->calc_totals( [0, 2] );
-    is_deeply extract( $table, 1 ), [3,undef,3],          "calc totals - by one col index";
+    is_deeply extract( $table, 1 ), [3,$nbsp,3],          "calc totals - by one col index";
 
     $table = DBIx::XHTML_Table->new( [@data] );
     $table->calc_totals( qw(HD_three) );
-    is_deeply extract( $table, 1 ), [undef,undef,3],      "calc totals - by matched lc col key";
+    is_deeply extract( $table, 1 ), [$nbsp,$nbsp,3],      "calc totals - by matched lc col key";
 
     $table = DBIx::XHTML_Table->new( [@data] );
     $table->calc_totals( qw(hd_TWo) );
-    is_deeply extract( $table, 1 ), [undef,3,undef],      "calc totals - by matched col key search";
+    is_deeply extract( $table, 1 ), [$nbsp,3,$nbsp],      "calc totals - by matched col key search";
 
     $table = DBIx::XHTML_Table->new( [@data] );
     $table->calc_totals( qw(HD_twO) );
-    is_deeply extract( $table, 1 ), [undef,3,undef],      "calc totals - by exact col key";
-};
+    is_deeply extract( $table, 1 ), [$nbsp,3,$nbsp],      "calc totals - by exact col key";
+}
 
 #    @data = (
 #        [@headers],
@@ -148,7 +147,6 @@ SKIP: {
 #        [ 'b', 4, 4 ],
 #    );
 #    $table = DBIx::XHTML_Table->new( [@data] );
-}
 
 
 
@@ -158,7 +156,8 @@ sub extract {
     my $extract = HTML::TableExtract->new( keep_headers => 1 );
     $extract->parse( $table->output );
     if (defined $row) {
-        return @{[ $extract->rows ]}[$row];
+        my $row = @{[ $extract->rows ]}[$row];
+        return $row;
     } elsif (defined $col) {
         # TODO: if needed
     } else {
