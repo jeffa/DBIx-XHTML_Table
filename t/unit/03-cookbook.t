@@ -37,7 +37,7 @@ for (0 .. $#tests) {
     $args{mod_args} ||= [];
     $args{out_args} ||= {};
 
-    my $file = sprintf( '%s/%03d-%s.md', $exp_dir, $_ + 1, $args{test} );
+    my $file = sprintf( '%s/%03d-%s.html', $exp_dir, $_ + 1, $args{test} );
 
     # execute the modifications
     $table = init_table() unless $args{no_init};
