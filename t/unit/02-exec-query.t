@@ -4,10 +4,15 @@ use strict;
 use warnings FATAL => 'all';
 use DBIx::XHTML_Table;
 use Test::More;
+use Data::Dumper;
 
 eval "use DBD::CSV";
 plan skip_all => "DBD::CSV required" if $@;
-plan tests => 2;
+
+eval "use HTML::TableExtract";
+plan skip_all => "HTML::TableExtract required" if $@;
+
+plan tests => 6;
 
 my $dbh = DBI->connect ("dbi:CSV:", undef, undef, {
     f_ext      => ".csv/r",
@@ -15,9 +20,35 @@ my $dbh = DBI->connect ("dbi:CSV:", undef, undef, {
     RaiseError => 1,
 });
 
-my $table = new_ok 'DBIx::XHTML_Table', [ $dbh ];
-$table->exec_query ("select * from test");
-is $table->output( { no_indent => 1 } ),
-    '<table><thead><tr><th>Id</th><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>1</td><td>plain</td><td>plain text</td></tr><tr><td>2</td><td>html</td><td>&lt;html&gt;some text&lt;/html&gt;</td></tr><tr><td>3</td><td>encoded</td><td>&amp;lt;html&amp;gt;some text&amp;lt;/html&amp;gt;</td></tr></tbody></table>',
-    "correct output from CSV file"
+is output( 'select * from test' ),
+    '<table><thead><tr><th>Id</th><th>Parent</th><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>1</td><td></td><td>root</td><td>the root</td></tr><tr><td>2</td><td>1</td><td>kid1</td><td>some kid</td></tr><tr><td>3</td><td>1</td><td>kid2</td><td>some other kid</td></tr><tr><td>4</td><td>2</td><td>grandkid1</td><td>a grandkid</td></tr><tr><td>5</td><td>3</td><td>grandkid2</td><td>another grandkid</td></tr><tr><td>6</td><td>3</td><td>greatgrandkid1</td><td>a great grandkid</td></tr></tbody></table>',
+    "select * returns all rows"
 ;
+
+is output( 'select id,parent,name,description from test' ),
+    '<table><thead><tr><th>Id</th><th>Parent</th><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>1</td><td></td><td>root</td><td>the root</td></tr><tr><td>2</td><td>1</td><td>kid1</td><td>some kid</td></tr><tr><td>3</td><td>1</td><td>kid2</td><td>some other kid</td></tr><tr><td>4</td><td>2</td><td>grandkid1</td><td>a grandkid</td></tr><tr><td>5</td><td>3</td><td>grandkid2</td><td>another grandkid</td></tr><tr><td>6</td><td>3</td><td>greatgrandkid1</td><td>a great grandkid</td></tr></tbody></table>',
+    "select all fields returns all rows"
+;
+
+is_deeply [ output( 'select id from test', 1 ) ], [ map [$_], 'Id', 1 .. 6 ], "select id returns only id rows";
+is_deeply [ output( 'select parent from test', 1 ) ], [ map [$_], 'Parent', undef, 1, 1, 2, 3, 3 ], "select parent returns only parent rows";
+is_deeply [ output( 'select name from test', 1 ) ], [ map [$_], qw(Name root kid1 kid2 grandkid1 grandkid2 greatgrandkid1) ], "select name returns only name rows";
+is_deeply [ output( 'select description from test', 1 ) ], [ map [$_], 'Description', 'the root', 'some kid', 'some other kid', 'a grandkid', 'another grandkid', 'a great grandkid' ], "select description returns only description rows";
+
+exit;
+
+sub output {
+    my ($query, $extract) = @_;
+    my $output = DBIx::XHTML_Table
+        ->new($dbh)
+        ->exec_query( $query )
+        ->output({ no_indent => 1 })
+    ;
+    if ($extract) {
+        $extract = HTML::TableExtract->new( keep_headers => 1 );
+        $extract->parse( $output );
+        return $extract->rows;
+    } else {
+        return $output;
+    }
+}

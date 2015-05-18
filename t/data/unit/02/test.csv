@@ -1,4 +1,7 @@
-id,name,description
-1,plain,"plain text"
-2,html,"<html>some text</html>"
-3,encoded,"&lt;html&gt;some text&lt;/html&gt;"
+id,parent,name,description
+1,,root,the root
+2,1,kid1,some kid
+3,1,kid2,some other kid
+4,2,grandkid1,a grandkid
+5,3,grandkid2,another grandkid
+6,3,greatgrandkid1,a great grandkid
