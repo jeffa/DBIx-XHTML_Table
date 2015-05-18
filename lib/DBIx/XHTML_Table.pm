@@ -312,7 +312,7 @@ sub set_group {
 	my ($self,$group,$nodup,$value) = @_;
 	$self->{'nodup'} = $value || $self->{'null_value'} if $nodup;
 	$self->{'group'} = $group = $group =~ /^\d+$/ 
-		? $self->_lookup_name($group) || lc $group : lc $group;
+		? $self->_lookup_name($group) || $group : $group;
 
 	my $index = $self->{'fields_hash'}->{$group} || 0;
 
@@ -337,7 +337,7 @@ sub set_pk {
 	my $pk   = shift || 'id';
 	$pk = $pk =~ /^\d+$/ ? $self->_lookup_name($pk) || $pk : $pk;
 	carp "can't call set_pk(): too late to set primary key" if exists $self->{'rows'};
-	$self->{'pk'} = lc $pk;
+	$self->{'pk'} = $pk;
 
 	return $self;
 }
