@@ -1,5 +1,7 @@
 Revision history for Perl extension DBIx::XHTML_Table.
 
+1.43
+
 1.42
     - fixed bug #6962 (Support for mixed case field names returned by the SQL query)
     - added DBD::CSV and HTML::TableExtract tests (will only run if mods are installed)
