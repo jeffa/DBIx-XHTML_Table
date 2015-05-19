@@ -28,7 +28,7 @@ my @tests = get_tests();
 plan tests => scalar( @tests ) + 1 unless @ARGV;
 
 our $table = init_table();
-my $exp_dir = "$Bin/../data/expected";
+my $exp_dir = "$Bin/../t/data/expected";
 
 is $DBIx::XHTML_Table::VERSION, $DBIx::XHTML_Table::VERSION, "this is version $DBIx::XHTML_Table::VERSION";
 
@@ -70,7 +70,7 @@ sub init_table {
     my $table = DBIx::XHTML_Table->new(
         DBI->connect ("dbi:CSV:", undef, undef, {
             f_ext      => ".csv/r",
-            f_dir      => "$Bin/../data",
+            f_dir      => "$Bin/../t/data",
             RaiseError => 1,
         })
     );
