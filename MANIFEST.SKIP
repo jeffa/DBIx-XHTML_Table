@@ -4,7 +4,9 @@ Makefile$
 MANIFEST.SKIP
 MANIFEST.bak
 MYMETA
-t/[^\/]+/
+t/author/
+t/unit/
+t/bug-fixes/
 blib/
 pm_to_blib
 ignore.txt
