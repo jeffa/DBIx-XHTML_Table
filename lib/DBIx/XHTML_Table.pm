@@ -466,7 +466,7 @@ sub _build_head {
 	# build the <caption> tag if applicable
 	if ($caption = $self->{'global'}->{'caption'}) {
 		$attribs = $self->{'global'}->{'caption_attribs'};
-		$cdata   = $self->_xml_encode($caption);
+		$cdata   = $self->{'encode_cells'} ? $self->_xml_encode($caption) : $caption;
 		$output .= $N.$T . _tag_it('caption', $attribs, $cdata);
 	}
 
@@ -527,7 +527,7 @@ sub _build_head_row {
 		}
 
         # bug 21761 "Special XML characters should be expressed as entities"
-        $field = $self->_xml_encode( $field );
+        $field = $self->_xml_encode( $field ) if $self->{'encode_cells'};
 
 		$output .= $T.$T . _tag_it('th', $attribs, $field) . $N;
 	}
@@ -604,7 +604,7 @@ sub _build_body_row {
 		$row->[$_] = '' unless defined($row->[$_]);
 
 		# bug 21761 "Special XML characters should be expressed as entities"
-		$row->[$_] = $self->_xml_encode( $row->[$_] );
+		$row->[$_] = $self->_xml_encode( $row->[$_] ) if $self->{'encode_cells'};
 
 		my $cdata = ($row->[$_] =~ /^\s+$/) 
 			? $self->{'null_value'}
@@ -1067,6 +1067,11 @@ Note: versions prior to 0.98 used a two argument form:
 
 You can still use this form to suppress titles and whitespace,
 but warnings will be generated.
+
+HTML encoding of table cells is turned off by default, but can
+be turned on via:
+
+  $table->{encode_cells} = 1;
 
 =item B<get_table>
 

@@ -2,11 +2,12 @@
 use strict;
 use warnings FATAL => 'all';
 use DBIx::XHTML_Table;
-use Test::More tests => 3;
+use Test::More tests => 2;
 
 my $attr = { no_indent => 1 };
 
-my $table = new_ok 'DBIx::XHTML_Table', [[ ['<"&>'], ['<"&>'] ]];
+my $table = DBIx::XHTML_Table->new( [ ['<"&>'], ['<"&>'] ] );
+$table->{encode_cells} = 1;
 is $table->output( $attr ),
     '<table><thead><tr><th>&lt;&quot;&amp;&gt;</th></tr></thead><tbody><tr><td>&lt;&quot;&amp;&gt;</td></tr></tbody></table>',
     'escape XML entities',
