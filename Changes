@@ -1,5 +1,7 @@
 Revision history for Perl extension DBIx::XHTML_Table.
 
+1.46
+
 1.45
     - readdressed bug #21761, client must now set 'encode_cells' to true
 
