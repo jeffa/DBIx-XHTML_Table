@@ -11,137 +11,137 @@ use Carp;
 use vars qw(%ESCAPES $T $N);
 ($T,$N)  = ("\t","\n");
 %ESCAPES = (
-	'&' => '&amp;',
-	'<' => '&lt;',
-	'>' => '&gt;',
-	'"' => '&quot;',
+    '&' => '&amp;',
+    '<' => '&lt;',
+    '>' => '&gt;',
+    '"' => '&quot;',
 );
 
 #################### CONSTRUCTOR ###################################
 
 # see POD for documentation
 sub new {
-	my $class = shift;
-	my $self  = {
-		null_value => '&nbsp;',
-	};
-	bless $self, $class;
+    my $class = shift;
+    my $self  = {
+        null_value => '&nbsp;',
+    };
+    bless $self, $class;
 
-	# last arg might be GTCH (global table config hash)
-	$self->{'global'} = pop if ref $_[$#_] eq 'HASH';
+    # last arg might be GTCH (global table config hash)
+    $self->{'global'} = pop if ref $_[$#_] eq 'HASH';
 
-	# note: disconnected handles aren't caught :(
+    # note: disconnected handles aren't caught :(
 
-	if (UNIVERSAL::isa($_[0],'DBI::db')) {
-		# use supplied db handle
-		$self->{'dbh'}        = $_[0];
-		$self->{'keep_alive'} = 1;
-	} 
-	elsif (ref($_[0]) eq 'ARRAY') {
-		# go ahead and accept a pre-built 2d array ref
-		$self->_do_black_magic(@_);
-	}
-	else {
-		# create my own db handle
-		eval { $self->{'dbh'} = DBI->connect(@_) };
-		carp $@ and return undef if $@;
-	}
+    if (UNIVERSAL::isa($_[0],'DBI::db')) {
+        # use supplied db handle
+        $self->{'dbh'}        = $_[0];
+        $self->{'keep_alive'} = 1;
+    } 
+    elsif (ref($_[0]) eq 'ARRAY') {
+        # go ahead and accept a pre-built 2d array ref
+        $self->_do_black_magic(@_);
+    }
+    else {
+        # create my own db handle
+        eval { $self->{'dbh'} = DBI->connect(@_) };
+        carp $@ and return undef if $@;
+    }
 
-	return $self;
+    return $self;
 }
 
 #################### OBJECT METHODS ################################
 
 sub exec_query {
-	my ($self,$sql,$vars) = @_;
+    my ($self,$sql,$vars) = @_;
 
-	carp "can't call exec_query(): do database handle" unless $self->{'dbh'};
+    carp "can't call exec_query(): do database handle" unless $self->{'dbh'};
 
-	eval {
-		$self->{'sth'} = (UNIVERSAL::isa($sql,'DBI::st'))
-			? $sql
-			: $self->{'dbh'}->prepare($sql)
-		;
-		$self->{'sth'}->execute(@$vars);
-	};
-	carp $@ and return undef if $@;
+    eval {
+        $self->{'sth'} = (UNIVERSAL::isa($sql,'DBI::st'))
+            ? $sql
+            : $self->{'dbh'}->prepare($sql)
+        ;
+        $self->{'sth'}->execute(@$vars);
+    };
+    carp $@ and return undef if $@;
 
-	# store the results
-	$self->{'fields_arry'} = [ @{$self->{'sth'}->{'NAME'}} ];
-	$self->{'fields_hash'} = $self->_reset_fields_hash();
-	$self->{'rows'}        = $self->{'sth'}->fetchall_arrayref();
-	carp "can't call exec_query(): no data was returned from query" unless @{$self->{'rows'}};
+    # store the results
+    $self->{'fields_arry'} = [ @{$self->{'sth'}->{'NAME'}} ];
+    $self->{'fields_hash'} = $self->_reset_fields_hash();
+    $self->{'rows'}        = $self->{'sth'}->fetchall_arrayref();
+    carp "can't call exec_query(): no data was returned from query" unless @{$self->{'rows'}};
 
-	if (exists $self->{'pk'}) {
-		# remove the primary key info from the arry and hash
-		$self->{'pk_index'} = delete $self->{'fields_hash'}->{$self->{'pk'}};
-		splice(@{$self->{'fields_arry'}},$self->{'pk_index'},1) if defined $self->{'pk_index'};
-	}
+    if (exists $self->{'pk'}) {
+        # remove the primary key info from the arry and hash
+        $self->{'pk_index'} = delete $self->{'fields_hash'}->{$self->{'pk'}};
+        splice(@{$self->{'fields_arry'}},$self->{'pk_index'},1) if defined $self->{'pk_index'};
+    }
 
-	return $self;
+    return $self;
 }
 
 sub output {
-	my ($self,$config,$no_ws) = @_;
-	carp "can't call output(): no data" and return '' unless $self->{'rows'};
+    my ($self,$config,$no_ws) = @_;
+    carp "can't call output(): no data" and return '' unless $self->{'rows'};
 
-	# have to deprecate old arguments ...
-	if ($no_ws) {
-		carp "scalar arguments to output() are deprecated, use hash reference";
-		$N = $T = '';
-	}
-	if ($config and not ref $config) {
-		carp "scalar arguments to output() are deprecated, use hash reference";
-		$self->{'no_head'} = $config;
-	}
-	elsif ($config) {
-		$self->{'no_head'}    = $config->{'no_head'};
-		$self->{'no_ucfirst'} = $config->{'no_ucfirst'};
-		$N = $T = ''         if $config->{'no_indent'};
-		if ($config->{'no_whitespace'}) {
-			carp "no_whitespace attrib deprecated, use no_indent";
-			$N = $T = '';
-		}
-	}
+    # have to deprecate old arguments ...
+    if ($no_ws) {
+        carp "scalar arguments to output() are deprecated, use hash reference";
+        $N = $T = '';
+    }
+    if ($config and not ref $config) {
+        carp "scalar arguments to output() are deprecated, use hash reference";
+        $self->{'no_head'} = $config;
+    }
+    elsif ($config) {
+        $self->{'no_head'}    = $config->{'no_head'};
+        $self->{'no_ucfirst'} = $config->{'no_ucfirst'};
+        $N = $T = ''         if $config->{'no_indent'};
+        if ($config->{'no_whitespace'}) {
+            carp "no_whitespace attrib deprecated, use no_indent";
+            $N = $T = '';
+        }
+    }
 
-	return $self->_build_table();
+    return $self->_build_table();
 }
 
 sub modify {
-	my ($self,$tag,$attribs,$cols) = @_;
-	$tag = lc $tag;
+    my ($self,$tag,$attribs,$cols) = @_;
+    $tag = lc $tag;
 
-	# apply attributes to specified columns
-	if (ref $attribs eq 'HASH') {
-		$cols = 'global' unless defined( $cols) && length( $cols );
-		$cols = $self->_refinate($cols);
+    # apply attributes to specified columns
+    if (ref $attribs eq 'HASH') {
+        $cols = 'global' unless defined( $cols) && length( $cols );
+        $cols = $self->_refinate($cols);
 
-		while (my($attr,$val) = each %$attribs) {
-			$self->{lc $_}->{$tag}->{$attr} = $val for @$cols;
-		}
-	}
-	# or handle a special case (e.g. <caption>)
-	else {
-		# cols is really attribs now, attribs is just a scalar
-		$self->{'global'}->{$tag} = $attribs;
+        while (my($attr,$val) = each %$attribs) {
+            $self->{lc $_}->{$tag}->{$attr} = $val for @$cols;
+        }
+    }
+    # or handle a special case (e.g. <caption>)
+    else {
+        # cols is really attribs now, attribs is just a scalar
+        $self->{'global'}->{$tag} = $attribs;
 
-		# there is only one caption - no need to rotate attribs
-		if (ref $cols->{'style'} eq 'HASH') {
-			$cols->{'style'} = join('; ',map { "$_: ".$cols->{'style'}->{$_} } sort keys %{$cols->{'style'}}) . ';';
-		}
+        # there is only one caption - no need to rotate attribs
+        if (ref $cols->{'style'} eq 'HASH') {
+            $cols->{'style'} = join('; ',map { "$_: ".$cols->{'style'}->{$_} } sort keys %{$cols->{'style'}}) . ';';
+        }
 
-		$self->{'global'}->{$tag."_attribs"} = $cols;
-	}
+        $self->{'global'}->{$tag."_attribs"} = $cols;
+    }
 
-	return $self;
+    return $self;
 }
 
 sub map_cell {
-	my ($self,$sub,$cols) = @_;
+    my ($self,$sub,$cols) = @_;
 
-	carp "map_cell() is being ignored - no data" and return $self unless $self->{'rows'};
+    carp "map_cell() is being ignored - no data" and return $self unless $self->{'rows'};
 
-	$cols = $self->_refinate($cols);
+    $cols = $self->_refinate($cols);
     for (@$cols) {
         my $key;
         if (defined $self->{'fields_hash'}->{$_}) {
@@ -159,15 +159,15 @@ sub map_cell {
         next unless $key;
         $self->{'map_cell'}->{$key} = $sub;
     }
-	return $self;
+    return $self;
 }
 
 sub map_head {
-	my ($self,$sub,$cols) = @_;
+    my ($self,$sub,$cols) = @_;
 
-	carp "map_head() is being ignored - no data" and return $self unless $self->{'rows'};
+    carp "map_head() is being ignored - no data" and return $self unless $self->{'rows'};
 
-	$cols = $self->_refinate($cols);
+    $cols = $self->_refinate($cols);
     for (@$cols) {
         my $key;
         if (defined $self->{'fields_hash'}->{$_}) {
@@ -186,25 +186,25 @@ sub map_head {
         $self->{'map_head'}->{$key} = $sub;
     }
 
-	return $self;
+    return $self;
 }
 
 sub add_col_tag {
-	my ($self,$attribs) = @_;
-	$self->{'global'}->{'colgroup'} = {} unless $self->{'colgroups'};
-	push @{$self->{'colgroups'}}, $attribs;
+    my ($self,$attribs) = @_;
+    $self->{'global'}->{'colgroup'} = {} unless $self->{'colgroups'};
+    push @{$self->{'colgroups'}}, $attribs;
 
-	return $self;
+    return $self;
 }
 
 sub calc_totals {
-	my ($self,$cols,$mask) = @_;
-	return undef unless $self->{'rows'};
+    my ($self,$cols,$mask) = @_;
+    return undef unless $self->{'rows'};
 
-	$self->{'totals_mask'} = $mask;
-	$cols = $self->_refinate($cols);
+    $self->{'totals_mask'} = $mask;
+    $cols = $self->_refinate($cols);
 
-	my @indexes;
+    my @indexes;
     for (@$cols) {
         my $index;
         if (exists $self->{'fields_hash'}->{$_}) {
@@ -222,19 +222,19 @@ sub calc_totals {
         push @indexes, $index;
     }
 
-	$self->{'totals'} = $self->_total_chunk($self->{'rows'},\@indexes);
+    $self->{'totals'} = $self->_total_chunk($self->{'rows'},\@indexes);
 
-	return $self;
+    return $self;
 }
 
 sub calc_subtotals {
-	my ($self,$cols,$mask,$nodups) = @_;
-	return undef unless $self->{'rows'};
+    my ($self,$cols,$mask,$nodups) = @_;
+    return undef unless $self->{'rows'};
 
-	$self->{'subtotals_mask'} = $mask;
-	$cols = $self->_refinate($cols);
+    $self->{'subtotals_mask'} = $mask;
+    $cols = $self->_refinate($cols);
 
-	my @indexes;
+    my @indexes;
     for (@$cols) {
         my $index;
         if (exists $self->{'fields_hash'}->{$_}) {
@@ -252,191 +252,191 @@ sub calc_subtotals {
         push @indexes, $index;
     }
 
-	my $beg = 0;
-	foreach my $end (@{$self->{'body_breaks'}}) {
-		my $chunk = ([@{$self->{'rows'}}[$beg..$end]]);
-		push @{$self->{'sub_totals'}}, $self->_total_chunk($chunk,\@indexes);
-		$beg = $end + 1;
-	}
+    my $beg = 0;
+    foreach my $end (@{$self->{'body_breaks'}}) {
+        my $chunk = ([@{$self->{'rows'}}[$beg..$end]]);
+        push @{$self->{'sub_totals'}}, $self->_total_chunk($chunk,\@indexes);
+        $beg = $end + 1;
+    }
 
-	return $self;
+    return $self;
 }
 
 sub set_row_colors {
-	my ($self,$colors,$myattrib) = @_;
+    my ($self,$colors,$myattrib) = @_;
 
-	return $self unless ref $colors eq 'ARRAY';
-	return $self unless $#$colors >= 1;
+    return $self unless ref $colors eq 'ARRAY';
+    return $self unless $#$colors >= 1;
 
-	my $ref = ($myattrib)
-		 ? { $myattrib => [@$colors] }
-		 : { style => {background => [@$colors]} }
-	;
+    my $ref = ($myattrib)
+         ? { $myattrib => [@$colors] }
+         : { style => {background => [@$colors]} }
+    ;
 
-	$self->modify(tr => $ref, 'body');
+    $self->modify(tr => $ref, 'body');
 
-	# maybe that should be global?
-	#$self->modify(tr => $ref);
+    # maybe that should be global?
+    #$self->modify(tr => $ref);
 
-	return $self;
+    return $self;
 }
 
 sub set_col_colors {
-	my ($self,$colors,$myattrib) = @_;
+    my ($self,$colors,$myattrib) = @_;
 
-	return $self unless ref $colors eq 'ARRAY';
-	return $self unless $#$colors >= 1;
+    return $self unless ref $colors eq 'ARRAY';
+    return $self unless $#$colors >= 1;
 
-	my $cols = $self->_refinate();
+    my $cols = $self->_refinate();
 
-	# trick #1: truncate colors to cols
-	$#$colors = $#$cols if $#$colors > $#$cols;
+    # trick #1: truncate colors to cols
+    $#$colors = $#$cols if $#$colors > $#$cols;
 
-	# trick #2: keep adding colors
-	#unless ($#$cols % 2 and $#$colors % 2) {
-		my $temp = [@$colors];
-		push(@$colors,_rotate($temp)) until $#$colors == $#$cols;
-	#}
+    # trick #2: keep adding colors
+    #unless ($#$cols % 2 and $#$colors % 2) {
+        my $temp = [@$colors];
+        push(@$colors,_rotate($temp)) until $#$colors == $#$cols;
+    #}
 
-	my $ref = ($myattrib)
-		 ? { $myattrib => [@$colors] }
-		 : { style => {background => [@$colors]} }
-	;
+    my $ref = ($myattrib)
+         ? { $myattrib => [@$colors] }
+         : { style => {background => [@$colors]} }
+    ;
 
-	$self->modify(td => $ref, $_) for @$cols;
+    $self->modify(td => $ref, $_) for @$cols;
 
-	return $self;
+    return $self;
 }
 
 sub set_group {
-	my ($self,$group,$nodup,$value) = @_;
-	$self->{'nodup'} = $value || $self->{'null_value'} if $nodup;
+    my ($self,$group,$nodup,$value) = @_;
+    $self->{'nodup'} = $value || $self->{'null_value'} if $nodup;
 
     my $index;
     if ($group =~ /^\d+$/) {
         $index = $group;
     } elsif (exists $self->{'fields_hash'}->{$group}) {
         $index = $self->{'fields_hash'}->{$group};    
-	    $self->{'group'} = $group;
+        $self->{'group'} = $group;
     } elsif (exists $self->{'fields_hash'}->{lc $group}) {
         $index = $self->{'fields_hash'}->{lc $group};    
-	    $self->{'group'} = lc $group;
+        $self->{'group'} = lc $group;
     } else {
         SEARCH: for my $k (sort keys %{ $self->{'fields_hash'} }) {
             if (lc( $k ) eq lc( $group )) {
                 $index = $self->{'fields_hash'}->{$k};
-	            $self->{'group'} = $k;
+                $self->{'group'} = $k;
                 last SEARCH;
             }
         }
     }
 
-	# initialize the first 'repetition'
-	my $rep = $self->{'rows'}->[0]->[$index];
+    # initialize the first 'repetition'
+    my $rep = $self->{'rows'}->[0]->[$index];
 
-	# loop through the whole rows array, storing
-	# the points at which a new group starts
-	for my $i (0..$self->get_row_count - 1) {
-		my $new = $self->{'rows'}->[$i]->[$index];
-		push @{$self->{'body_breaks'}}, $i - 1 unless ($rep eq $new);
-		$rep = $new;
-	}
+    # loop through the whole rows array, storing
+    # the points at which a new group starts
+    for my $i (0..$self->get_row_count - 1) {
+        my $new = $self->{'rows'}->[$i]->[$index];
+        push @{$self->{'body_breaks'}}, $i - 1 unless ($rep eq $new);
+        $rep = $new;
+    }
 
-	push @{$self->{'body_breaks'}}, $self->get_row_count - 1;
+    push @{$self->{'body_breaks'}}, $self->get_row_count - 1;
 
-	return $self;
+    return $self;
 }
 
 sub set_pk {
-	my $self = shift;
-	my $pk   = shift || 'id';
-	$pk = $pk =~ /^\d+$/ ? $self->_lookup_name($pk) || $pk : $pk;
-	carp "can't call set_pk(): too late to set primary key" if exists $self->{'rows'};
-	$self->{'pk'} = $pk;
+    my $self = shift;
+    my $pk   = shift || 'id';
+    $pk = $pk =~ /^\d+$/ ? $self->_lookup_name($pk) || $pk : $pk;
+    carp "can't call set_pk(): too late to set primary key" if exists $self->{'rows'};
+    $self->{'pk'} = $pk;
 
-	return $self;
+    return $self;
 }
 
 sub set_null_value {
-	my ($self,$value) = @_;
-	$self->{'null_value'} = $value;
-	return $self;
+    my ($self,$value) = @_;
+    $self->{'null_value'} = $value;
+    return $self;
 }
 
 sub get_col_count {
-	my ($self) = @_;
-	my $count = scalar @{$self->{'fields_arry'}};
-	return $count;
+    my ($self) = @_;
+    my $count = scalar @{$self->{'fields_arry'}};
+    return $count;
 }
 
 sub get_row_count {
-	my ($self) = @_;
-	my $count = scalar @{$self->{'rows'}};
-	return $count;
+    my ($self) = @_;
+    my $count = scalar @{$self->{'rows'}};
+    return $count;
 }
 
 sub get_current_row {
-	return shift->{'current_row'};
+    return shift->{'current_row'};
 }
 
 sub get_current_col {
-	return shift->{'current_col'};
+    return shift->{'current_col'};
 }
 
 sub reset {
-	my ($self) = @_;
+    my ($self) = @_;
 }
 
 sub add_cols {
-	my ($self,$config) = @_;
-	$config = [$config] unless ref $config eq 'ARRAY';
+    my ($self,$config) = @_;
+    $config = [$config] unless ref $config eq 'ARRAY';
 
-	foreach (@$config) {
-		next unless ref $_ eq 'HASH';
-		my ($name,$data,$pos) = @$_{(qw(name data before))};
-		my $max_pos = $self->get_col_count();
+    foreach (@$config) {
+        next unless ref $_ eq 'HASH';
+        my ($name,$data,$pos) = @$_{(qw(name data before))};
+        my $max_pos = $self->get_col_count();
 
-		$pos  = $self->_lookup_index(ucfirst $pos || '') || $max_pos unless defined $pos && $pos =~ /^\d+$/;
-		$pos  = $max_pos if $pos > $max_pos;
-		$data = [$data] unless ref $data eq 'ARRAY';
+        $pos  = $self->_lookup_index(ucfirst $pos || '') || $max_pos unless defined $pos && $pos =~ /^\d+$/;
+        $pos  = $max_pos if $pos > $max_pos;
+        $data = [$data] unless ref $data eq 'ARRAY';
 
-		splice(@{$self->{'fields_arry'}},$pos,0,$name);
-		$self->_reset_fields_hash();
-		splice(@$_,$pos,0,_rotate($data)) for (@{$self->{rows}});
-	}
+        splice(@{$self->{'fields_arry'}},$pos,0,$name);
+        $self->_reset_fields_hash();
+        splice(@$_,$pos,0,_rotate($data)) for (@{$self->{rows}});
+    }
 
-	return $self;
+    return $self;
 }
 
 sub drop_cols {
-	my ($self,$cols) = @_;
-	$cols = $self->_refinate($cols);
+    my ($self,$cols) = @_;
+    $cols = $self->_refinate($cols);
 
-	foreach my $col (@$cols) {
-		my $index = delete $self->{'fields_hash'}->{$col};
-		splice(@{$self->{'fields_arry'}},$index,1);
-		$self->_reset_fields_hash();
-		splice(@$_,$index,1) for (@{$self->{'rows'}});
-	}
+    foreach my $col (@$cols) {
+        my $index = delete $self->{'fields_hash'}->{$col};
+        splice(@{$self->{'fields_arry'}},$index,1);
+        $self->_reset_fields_hash();
+        splice(@$_,$index,1) for (@{$self->{'rows'}});
+    }
 
-	return $self;
+    return $self;
 }
 
 ###################### DEPRECATED ##################################
 
 sub get_table { 
-	carp "get_table() is deprecated. Use output() instead";
-	output(@_);
+    carp "get_table() is deprecated. Use output() instead";
+    output(@_);
 }
 
 sub modify_tag {
-	carp "modify_tag() is deprecated. Use modify() instead";
-	modify(@_);
+    carp "modify_tag() is deprecated. Use modify() instead";
+    modify(@_);
 }
 
 sub map_col { 
-	carp "map_col() is deprecated. Use map_cell() instead";
-	map_cell(@_);
+    carp "map_col() is deprecated. Use map_cell() instead";
+    map_cell(@_);
 }
 
 #################### UNDER THE HOOD ################################
@@ -444,296 +444,296 @@ sub map_col {
 # repeat: it only looks complicated
 
 sub _build_table {
-	my ($self)  = @_;
-	my $attribs = $self->{'global'}->{'table'};
+    my ($self)  = @_;
+    my $attribs = $self->{'global'}->{'table'};
 
-	my ($head,$body,$foot);
-	$head = $self->_build_head;
-	$body = $self->{'rows'}   ?  $self->_build_body : '';
-	$foot = $self->{'totals'} ?  $self->_build_foot : '';
+    my ($head,$body,$foot);
+    $head = $self->_build_head;
+    $body = $self->{'rows'}   ?  $self->_build_body : '';
+    $foot = $self->{'totals'} ?  $self->_build_foot : '';
 
-	# w3c says tfoot comes before tbody ...
-	my $cdata = $head . $foot . $body;
+    # w3c says tfoot comes before tbody ...
+    my $cdata = $head . $foot . $body;
 
-	return _tag_it('table', $attribs, $cdata) . $N;
+    return _tag_it('table', $attribs, $cdata) . $N;
 }
 
 sub _build_head {
-	my ($self) = @_;
-	my ($attribs,$cdata,$caption);
-	my $output = '';
+    my ($self) = @_;
+    my ($attribs,$cdata,$caption);
+    my $output = '';
 
-	# build the <caption> tag if applicable
-	if ($caption = $self->{'global'}->{'caption'}) {
-		$attribs = $self->{'global'}->{'caption_attribs'};
-		$cdata   = $self->{'encode_cells'} ? $self->_xml_encode($caption) : $caption;
-		$output .= $N.$T . _tag_it('caption', $attribs, $cdata);
-	}
+    # build the <caption> tag if applicable
+    if ($caption = $self->{'global'}->{'caption'}) {
+        $attribs = $self->{'global'}->{'caption_attribs'};
+        $cdata   = $self->{'encode_cells'} ? $self->_xml_encode($caption) : $caption;
+        $output .= $N.$T . _tag_it('caption', $attribs, $cdata);
+    }
 
-	# build the <colgroup> tags if applicable
-	if ($attribs = $self->{'global'}->{'colgroup'}) {
-		$cdata   = $self->_build_head_colgroups();
-		$output .= $N.$T . _tag_it('colgroup', $attribs, $cdata);
-	}
+    # build the <colgroup> tags if applicable
+    if ($attribs = $self->{'global'}->{'colgroup'}) {
+        $cdata   = $self->_build_head_colgroups();
+        $output .= $N.$T . _tag_it('colgroup', $attribs, $cdata);
+    }
 
-	# go ahead and stop if they don't want the head
-	return "$output\n" if $self->{'no_head'};
+    # go ahead and stop if they don't want the head
+    return "$output\n" if $self->{'no_head'};
 
-	# prepare <tr> tag info
-	my $tr_attribs = _merge_attribs(
-		$self->{'head'}->{'tr'}, $self->{'global'}->{'tr'}
-	);
-	my $tr_cdata   = $self->_build_head_row();
+    # prepare <tr> tag info
+    my $tr_attribs = _merge_attribs(
+        $self->{'head'}->{'tr'}, $self->{'global'}->{'tr'}
+    );
+    my $tr_cdata   = $self->_build_head_row();
 
-	# prepare the <thead> tag info
-	$attribs = $self->{'head'}->{'thead'} || $self->{'global'}->{'thead'};
-	$cdata   = $N.$T . _tag_it('tr', $tr_attribs, $tr_cdata) . $N.$T;
+    # prepare the <thead> tag info
+    $attribs = $self->{'head'}->{'thead'} || $self->{'global'}->{'thead'};
+    $cdata   = $N.$T . _tag_it('tr', $tr_attribs, $tr_cdata) . $N.$T;
 
-	# add the <thead> tag to the output
-	$output .= $N.$T . _tag_it('thead', $attribs, $cdata) . $N;
+    # add the <thead> tag to the output
+    $output .= $N.$T . _tag_it('thead', $attribs, $cdata) . $N;
 }
 
 sub _build_head_colgroups {
-	my ($self) = @_;
-	my (@cols,$output);
+    my ($self) = @_;
+    my (@cols,$output);
 
-	return unless $self->{'colgroups'};
-	return undef unless @cols = @{$self->{'colgroups'}};
+    return unless $self->{'colgroups'};
+    return undef unless @cols = @{$self->{'colgroups'}};
 
-	foreach (@cols) {
-		$output .= $N.$T.$T . _tag_it('col', $_);
-	}
-	$output .= $N.$T;
+    foreach (@cols) {
+        $output .= $N.$T.$T . _tag_it('col', $_);
+    }
+    $output .= $N.$T;
 
-	return $output;
+    return $output;
 }
 
 sub _build_head_row {
-	my ($self) = @_;
-	my $output = $N;
-	my @copy   = @{$self->{'fields_arry'}};
+    my ($self) = @_;
+    my $output = $N;
+    my @copy   = @{$self->{'fields_arry'}};
 
-	foreach my $field (@copy) {
-		my $attribs = _merge_attribs(
-			$self->{$field}->{'th'}   || $self->{'head'}->{'th'},
-			$self->{'global'}->{'th'} || $self->{'head'}->{'th'},
-		);
+    foreach my $field (@copy) {
+        my $attribs = _merge_attribs(
+            $self->{$field}->{'th'}   || $self->{'head'}->{'th'},
+            $self->{'global'}->{'th'} || $self->{'head'}->{'th'},
+        );
 
-		if (my $sub = $self->{'map_head'}->{$field}) {
-			$field = $sub->($field);
-		}
-		elsif (!$self->{'no_ucfirst'}) {
-			$field = ucfirst( lc( $field ) );
-		}
+        if (my $sub = $self->{'map_head'}->{$field}) {
+            $field = $sub->($field);
+        }
+        elsif (!$self->{'no_ucfirst'}) {
+            $field = ucfirst( lc( $field ) );
+        }
 
         # bug 21761 "Special XML characters should be expressed as entities"
         $field = $self->_xml_encode( $field ) if $self->{'encode_cells'};
 
-		$output .= $T.$T . _tag_it('th', $attribs, $field) . $N;
-	}
+        $output .= $T.$T . _tag_it('th', $attribs, $field) . $N;
+    }
 
-	return $output . $T;
+    return $output . $T;
 }
 
 sub _build_body {
 
-	my ($self)   = @_;
-	my $beg      = 0;
-	my $output;
+    my ($self)   = @_;
+    my $beg      = 0;
+    my $output;
 
-	# if a group was not set via set_group(), then use the entire 2-d array
-	my @indicies = exists $self->{'body_breaks'}
-		? @{$self->{'body_breaks'}}
-		: ($self->get_row_count - 1);
+    # if a group was not set via set_group(), then use the entire 2-d array
+    my @indicies = exists $self->{'body_breaks'}
+        ? @{$self->{'body_breaks'}}
+        : ($self->get_row_count - 1);
 
-	# the skinny here is to grab a slice of the rows, one for each group
-	foreach my $end (@indicies) {
-		my $body_group = $self->_build_body_group([@{$self->{'rows'}}[$beg..$end]]) || '';
-		my $attribs    = $self->{'global'}->{'tbody'} || $self->{'body'}->{'tbody'};
-		my $cdata      = $N . $body_group . $T;
+    # the skinny here is to grab a slice of the rows, one for each group
+    foreach my $end (@indicies) {
+        my $body_group = $self->_build_body_group([@{$self->{'rows'}}[$beg..$end]]) || '';
+        my $attribs    = $self->{'global'}->{'tbody'} || $self->{'body'}->{'tbody'};
+        my $cdata      = $N . $body_group . $T;
 
-		$output .= $T . _tag_it('tbody',$attribs,$cdata) . $N;
-		$beg = $end + 1;
-	}
-	return $output;
+        $output .= $T . _tag_it('tbody',$attribs,$cdata) . $N;
+        $beg = $end + 1;
+    }
+    return $output;
 }
 
 sub _build_body_group {
 
-	my ($self,$chunk) = @_;
-	my ($output,$cdata);
-	my $attribs = _merge_attribs(
-		$self->{'body'}->{'tr'}, $self->{'global'}->{'tr'}
-	);
-	my $pk_col = '';
+    my ($self,$chunk) = @_;
+    my ($output,$cdata);
+    my $attribs = _merge_attribs(
+        $self->{'body'}->{'tr'}, $self->{'global'}->{'tr'}
+    );
+    my $pk_col = '';
 
-	# build the rows
-	for my $i (0..$#$chunk) {
-		my @row  = @{$chunk->[$i]};
-		$pk_col  = splice(@row,$self->{'pk_index'},1) if defined $self->{'pk_index'};
-		$cdata   = $self->_build_body_row(\@row, ($i and $self->{'nodup'} or 0), $pk_col);
-		$output .= $T . _tag_it('tr',$attribs,$cdata) . $N;
-	}
+    # build the rows
+    for my $i (0..$#$chunk) {
+        my @row  = @{$chunk->[$i]};
+        $pk_col  = splice(@row,$self->{'pk_index'},1) if defined $self->{'pk_index'};
+        $cdata   = $self->_build_body_row(\@row, ($i and $self->{'nodup'} or 0), $pk_col);
+        $output .= $T . _tag_it('tr',$attribs,$cdata) . $N;
+    }
 
-	# build the subtotal row if applicable
-	if (my $subtotals = shift @{$self->{'sub_totals'}}) {
-		$cdata   = $self->_build_body_subtotal($subtotals);
-		$output .= $T . _tag_it('tr',$attribs,$cdata) . $N;
-	}
+    # build the subtotal row if applicable
+    if (my $subtotals = shift @{$self->{'sub_totals'}}) {
+        $cdata   = $self->_build_body_subtotal($subtotals);
+        $output .= $T . _tag_it('tr',$attribs,$cdata) . $N;
+    }
 
-	return $output;
+    return $output;
 }
 
 sub _build_body_row {
-	my ($self,$row,$nodup,$pk) = @_;
+    my ($self,$row,$nodup,$pk) = @_;
 
-	my $group  = $self->{'group'};
-	my $index  = $self->_lookup_index($group) if $group;
-	my $output = $N;
+    my $group  = $self->{'group'};
+    my $index  = $self->_lookup_index($group) if $group;
+    my $output = $N;
 
-	$self->{'current_row'} = $pk;
+    $self->{'current_row'} = $pk;
 
-	for (0..$#$row) {
-		my $name    = $self->_lookup_name($_);
-		my $attribs = _merge_attribs(
-			$self->{$name}->{'td'}    || $self->{'body'}->{'td'}, 
-			$self->{'global'}->{'td'} || $self->{'body'}->{'td'},
-		);
+    for (0..$#$row) {
+        my $name    = $self->_lookup_name($_);
+        my $attribs = _merge_attribs(
+            $self->{$name}->{'td'}    || $self->{'body'}->{'td'}, 
+            $self->{'global'}->{'td'} || $self->{'body'}->{'td'},
+        );
 
-		# suppress warnings AND keep 0 from becoming &nbsp;
-		$row->[$_] = '' unless defined($row->[$_]);
+        # suppress warnings AND keep 0 from becoming &nbsp;
+        $row->[$_] = '' unless defined($row->[$_]);
 
-		# bug 21761 "Special XML characters should be expressed as entities"
-		$row->[$_] = $self->_xml_encode( $row->[$_] ) if $self->{'encode_cells'};
+        # bug 21761 "Special XML characters should be expressed as entities"
+        $row->[$_] = $self->_xml_encode( $row->[$_] ) if $self->{'encode_cells'};
 
-		my $cdata = ($row->[$_] =~ /^\s+$/) 
-			? $self->{'null_value'}
-			: $row->[$_] 
-		;
+        my $cdata = ($row->[$_] =~ /^\s+$/) 
+            ? $self->{'null_value'}
+            : $row->[$_] 
+        ;
 
-		$self->{'current_col'} = $name;
+        $self->{'current_col'} = $name;
 
-		$cdata = ($nodup and $index == $_)
-			? $self->{'nodup'}
-			: _map_it($self->{'map_cell'}->{$name},$cdata)
-		;
+        $cdata = ($nodup and $index == $_)
+            ? $self->{'nodup'}
+            : _map_it($self->{'map_cell'}->{$name},$cdata)
+        ;
 
-		$output .= $T.$T . _tag_it('td', $attribs, $cdata) . $N;
-	}
-	return $output . $T;
+        $output .= $T.$T . _tag_it('td', $attribs, $cdata) . $N;
+    }
+    return $output . $T;
 }
 
 sub _build_body_subtotal {
-	my ($self,$row) = @_;
-	my $output = $N;
+    my ($self,$row) = @_;
+    my $output = $N;
 
-	return '' unless $row;
+    return '' unless $row;
 
-	for (0..$#$row) {
-		my $name    = $self->_lookup_name($_);
-		my $sum     = ($row->[$_]);
-		my $attribs = _merge_attribs(
-			$self->{$name}->{'th'}    || $self->{'body'}->{'th'},
-			$self->{'global'}->{'th'} || $self->{'body'}->{'th'},
-		);
+    for (0..$#$row) {
+        my $name    = $self->_lookup_name($_);
+        my $sum     = ($row->[$_]);
+        my $attribs = _merge_attribs(
+            $self->{$name}->{'th'}    || $self->{'body'}->{'th'},
+            $self->{'global'}->{'th'} || $self->{'body'}->{'th'},
+        );
 
-		# use sprintf if mask was supplied
-		if ($self->{'subtotals_mask'} and defined $sum) {
-			$sum = sprintf($self->{'subtotals_mask'},$sum);
-		}
-		else {
-			$sum = (defined $sum) ? $sum : $self->{'null_value'};
-		}
+        # use sprintf if mask was supplied
+        if ($self->{'subtotals_mask'} and defined $sum) {
+            $sum = sprintf($self->{'subtotals_mask'},$sum);
+        }
+        else {
+            $sum = (defined $sum) ? $sum : $self->{'null_value'};
+        }
 
-		$output .= $T.$T . _tag_it('th', $attribs, $sum) . $N;
-	}
-	return $output . $T;
+        $output .= $T.$T . _tag_it('th', $attribs, $sum) . $N;
+    }
+    return $output . $T;
 }
 
 sub _build_foot {
-	my ($self) = @_;
+    my ($self) = @_;
 
-	my $tr_attribs = _merge_attribs(
-		# notice that foot is 1st and global 2nd - different than rest
-		$self->{'foot'}->{'tr'}, $self->{'global'}->{'tr'}
-	);
-	my $tr_cdata   = $self->_build_foot_row();
+    my $tr_attribs = _merge_attribs(
+        # notice that foot is 1st and global 2nd - different than rest
+        $self->{'foot'}->{'tr'}, $self->{'global'}->{'tr'}
+    );
+    my $tr_cdata   = $self->_build_foot_row();
 
-	my $attribs = $self->{'foot'}->{'tfoot'} || $self->{'global'}->{'tfoot'};
-	my $cdata   = $N.$T . _tag_it('tr', $tr_attribs, $tr_cdata) . $N.$T;
+    my $attribs = $self->{'foot'}->{'tfoot'} || $self->{'global'}->{'tfoot'};
+    my $cdata   = $N.$T . _tag_it('tr', $tr_attribs, $tr_cdata) . $N.$T;
 
-	return $T . _tag_it('tfoot',$attribs,$cdata) . $N;
+    return $T . _tag_it('tfoot',$attribs,$cdata) . $N;
 }
 
 sub _build_foot_row {
-	my ($self) = @_;
+    my ($self) = @_;
 
-	my $output = $N;
-	my $row    = $self->{'totals'};
+    my $output = $N;
+    my $row    = $self->{'totals'};
 
-	for (0..$#$row) {
-		my $name    = $self->_lookup_name($_);
-		my $attribs = _merge_attribs(
-			$self->{$name}->{'th'}    || $self->{'foot'}->{'th'},
-			$self->{'global'}->{'th'} || $self->{'foot'}->{'th'},
-		);
-		my $sum     = ($row->[$_]);
+    for (0..$#$row) {
+        my $name    = $self->_lookup_name($_);
+        my $attribs = _merge_attribs(
+            $self->{$name}->{'th'}    || $self->{'foot'}->{'th'},
+            $self->{'global'}->{'th'} || $self->{'foot'}->{'th'},
+        );
+        my $sum     = ($row->[$_]);
 
-		# use sprintf if mask was supplied
-		if ($self->{'totals_mask'} and defined $sum) {
-			$sum = sprintf($self->{'totals_mask'},$sum)
-		}
-		else {
-			$sum = defined $sum ? $sum : $self->{'null_value'};
-		}
+        # use sprintf if mask was supplied
+        if ($self->{'totals_mask'} and defined $sum) {
+            $sum = sprintf($self->{'totals_mask'},$sum)
+        }
+        else {
+            $sum = defined $sum ? $sum : $self->{'null_value'};
+        }
 
-		$output .= $T.$T . _tag_it('th', $attribs, $sum) . $N;
-	}
-	return $output . $T;
+        $output .= $T.$T . _tag_it('th', $attribs, $sum) . $N;
+    }
+    return $output . $T;
 }
 
 # builds a tag and it's enclosed data
 sub _tag_it {
-	my ($name,$attribs,$cdata) = @_;
-	my $text = "<\L$name\E";
+    my ($name,$attribs,$cdata) = @_;
+    my $text = "<\L$name\E";
 
-	# build the attributes if any - skip blank vals
+    # build the attributes if any - skip blank vals
     for my $k (sort keys %{$attribs}) {
         my $v = $attribs->{$k};
-		if (ref $v eq 'HASH') {
-			$v = join('; ', map { 
-				my $attrib = $_;
-				my $value  = (ref $v->{$_} eq 'ARRAY') 
-					? _rotate($v->{$_}) 
-					: $v->{$_};
-				join(': ',$attrib,$value||'');
-			} sort keys %$v) . ';';
-		}
-		$v = _rotate($v) if (ref $v eq 'ARRAY');
-		$text .= qq| \L$k\E="$v"| unless $v =~ /^$/;
-	}
-	$text .= (defined $cdata) ? ">$cdata</\L$name\E>" : '/>';
+        if (ref $v eq 'HASH') {
+            $v = join('; ', map { 
+                my $attrib = $_;
+                my $value  = (ref $v->{$_} eq 'ARRAY') 
+                    ? _rotate($v->{$_}) 
+                    : $v->{$_};
+                join(': ',$attrib,$value||'');
+            } sort keys %$v) . ';';
+        }
+        $v = _rotate($v) if (ref $v eq 'ARRAY');
+        $text .= qq| \L$k\E="$v"| unless $v =~ /^$/;
+    }
+    $text .= (defined $cdata) ? ">$cdata</\L$name\E>" : '/>';
 }
 
 # used by map_cell() and map_head()
 sub _map_it {
-	my ($sub,$datum) = @_;
-	return $datum unless $sub;
-	return $datum = $sub->($datum);
+    my ($sub,$datum) = @_;
+    return $datum unless $sub;
+    return $datum = $sub->($datum);
 }
 
 # used by calc_totals() and calc_subtotals()
 sub _total_chunk {
-	my ($self,$chunk,$indexes) = @_;
-	my %totals;
+    my ($self,$chunk,$indexes) = @_;
+    my %totals;
 
-	foreach my $row (@$chunk) {
-		foreach (@$indexes) {
-			$totals{$_} += $row->[$_] if $row->[$_] =~ /^[-0-9\.]+$/;
-		}	
-	}
+    foreach my $row (@$chunk) {
+        foreach (@$indexes) {
+            $totals{$_} += $row->[$_] if $row->[$_] =~ /^[-0-9\.]+$/;
+        }    
+    }
 
-	return [ map { defined $totals{$_} ? $totals{$_} : undef } (0 .. $self->get_col_count() - 1) ];
+    return [ map { defined $totals{$_} ? $totals{$_} : undef } (0 .. $self->get_col_count() - 1) ];
 }
 
 # uses %ESCAPES to convert the '4 Horsemen' of XML
@@ -741,66 +741,66 @@ sub _total_chunk {
 sub _xml_encode {
     my ($self,$str) = @_;
     $str =~ s/([&<>"])/$ESCAPES{$1}/ge;
-	return $str;
+    return $str;
 }
 
 # returns value of and moves first element to last
 sub _rotate {
-	my $ref  = shift;
-	my $next = shift @$ref;
-	push @$ref, $next;
-	return $next;
+    my $ref  = shift;
+    my $next = shift @$ref;
+    push @$ref, $next;
+    return $next;
 }
 
 # always returns an array ref
 sub _refinate {
-	my ($self,$ref) = @_;
+    my ($self,$ref) = @_;
     $ref = undef if ref($ref) eq 'ARRAY' && scalar( @$ref ) < 1;
-	$ref = [@{$self->{'fields_arry'}}] unless defined $ref;
-	$ref = [$ref] unless ref $ref eq 'ARRAY';
-	return [map {$_ =~ /^\d+$/ ? $self->_lookup_name($_) || $_ : $_} @$ref];
+    $ref = [@{$self->{'fields_arry'}}] unless defined $ref;
+    $ref = [$ref] unless ref $ref eq 'ARRAY';
+    return [map {$_ =~ /^\d+$/ ? $self->_lookup_name($_) || $_ : $_} @$ref];
 }
 
 sub _merge_attribs {
-	my ($hash1,$hash2) = @_;
+    my ($hash1,$hash2) = @_;
 
-	return $hash1 unless $hash2;
-	return $hash2 unless $hash1;
+    return $hash1 unless $hash2;
+    return $hash2 unless $hash1;
 
-	return {%$hash2,%$hash1};
+    return {%$hash2,%$hash1};
 }
 
 sub _lookup_name {
-	my ($self,$index) = @_;
-	return $self->{'fields_arry'}->[$index];
+    my ($self,$index) = @_;
+    return $self->{'fields_arry'}->[$index];
 }
 
 sub _lookup_index {
-	my ($self,$name) = @_;
-	return $self->{'fields_hash'}->{$name};
+    my ($self,$name) = @_;
+    return $self->{'fields_hash'}->{$name};
 }
 
 sub _reset_fields_hash {
-	my $self = shift;
-	my $i    = 0;
-	$self->{fields_hash} = { map { $_ => $i++ } @{$self->{fields_arry}} };
+    my $self = shift;
+    my $i    = 0;
+    $self->{fields_hash} = { map { $_ => $i++ } @{$self->{fields_arry}} };
 }
 
 # assigns a non-DBI supplied data table (2D array ref)
 sub _do_black_magic {
-	my ($self,$ref,$headers) = @_;
+    my ($self,$ref,$headers) = @_;
     croak "bad data" unless ref( $ref->[0] ) eq 'ARRAY';
-	$self->{'fields_arry'} = $headers ? [@$headers] : [ @{ shift @$ref } ];
-	$self->{'fields_hash'} = $self->_reset_fields_hash();
-	$self->{'rows'}        = $ref;
+    $self->{'fields_arry'} = $headers ? [@$headers] : [ @{ shift @$ref } ];
+    $self->{'fields_hash'} = $self->_reset_fields_hash();
+    $self->{'rows'}        = $ref;
 }
 
 # disconnect database handle if i created it
 sub DESTROY {
-	my ($self) = @_;
-	unless ($self->{'keep_alive'}) {
-		$self->{'dbh'}->disconnect if defined $self->{'dbh'};
-	}
+    my ($self) = @_;
+    unless ($self->{'keep_alive'}) {
+        $self->{'dbh'}->disconnect if defined $self->{'dbh'};
+    }
 }
 
 1;
@@ -911,7 +911,7 @@ similar 'attributes' hash reference.'
   };
 
   my $table = DBIx::XHTML_Table->new(
-  	$data_source,$user,$pass,$attribs
+      $data_source,$user,$pass,$attribs
   ) or die "couldn't connect to database";
 
 But it is still experimental and unpleasantly limiting.
@@ -1002,16 +1002,16 @@ bind variable or an array reference for multiple bind vars:
 
   $table->exec_query('
       select bar,baz from foo
-	  where bar = ?
-	  and   baz = ?
+      where bar = ?
+      and   baz = ?
   ',[$foo,$bar]);
 
 exec_query() also accepts a prepared DBI::st handle:
 
   my $sth = $dbh->prepare('
       select bar,baz from foo
-	  where bar = ?
-	  and   baz = ?
+      where bar = ?
+      and   baz = ?
   ');
 
   $table->exec_query($sth,[$foo,$bar]);
