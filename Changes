@@ -1,5 +1,7 @@
 Revision history for Perl extension DBIx::XHTML_Table.
 
+1.47
+
 1.46
     - added github meta to makefile
     - reformatted source code to use spaces for indentation
