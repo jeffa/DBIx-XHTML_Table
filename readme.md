@@ -1,6 +1,6 @@
 DBIx-XHTML_Table 
 ================
-Create HTML tables from SQL queries. [![CPAN version](https://badge.fury.io/pl/DBIx%3A%3AXHTML_Table.svg)](https://badge.fury.io/pl/DBIx-XHTML_Table)
+Create HTML tables from SQL queries.
 
 Synopsis
 --------
