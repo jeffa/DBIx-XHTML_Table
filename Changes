@@ -1,6 +1,7 @@
 Revision history for Perl extension DBIx::XHTML_Table.
 
 1.47
+    - fix bug tracker location
 
 1.46
     - added github meta to makefile

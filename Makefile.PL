@@ -25,7 +25,6 @@ WriteMakefile(
             resources => {
                 homepage   => 'https://github.com/jeffa/DBIx-XHTML_Table',
                 repository => 'https://github.com/jeffa/DBIx-XHTML_Table.git',
-                bugtracker => 'https://github.com/jeffa/DBIx-XHTML_Table/issues',
             },
         })
     ),
