@@ -1,5 +1,5 @@
-DBIx-XHTML_Table 
-================
+DBIx::XHTML_Table 
+=================
 Create HTML tables from SQL queries. [![CPAN Version](https://badge.fury.io/pl/DBIx-XHTML_Table.svg)](https://metacpan.org/pod/DBIx::XHTML_Table) [![Build Status](https://api.travis-ci.org/jeffa/DBIx-XHTML_Table.svg?branch=master)](https://travis-ci.org/jeffa/DBIx-XHTML_Table)
 
 Synopsis
