@@ -837,27 +837,52 @@ DBIx::XHTML_Table - SQL query result set to XHTML table.
 
 =head1 DESCRIPTION
 
-B<DBIx::XHTML_Table> is a DBI extension that creates an XHTML
+B<DBIx::XHTML_Table> is a DBI extension that creates an HTML
 table from a database query result set. It was created to fill
-the gap between fetching rows from a database and transforming
-them into a web browser renderable table. DBIx::XHTML_Table is
+the gap between fetching data from a database and transforming
+that data into a web browser renderable table. DBIx::XHTML_Table is
 intended for programmers who want the responsibility of presenting
 (decorating) data, easily. This module is meant to be used in situations
 where the concern for presentation and logic seperation is overkill.
 Providing logic or editable data is beyond the scope of this module,
 but it is capable of doing such.
 
-DBIx::XHTML_Table is over one decade old now and has been in
-need of a rewrite for a long time. Two new modules are being
-developed to handle the most of the current responsibilites. This
-module will not be retired, but usage of the following is encouraged
-once they have both matured to version 1.0 and greater:
+=head1 CODE FREEZE
+
+For the most part, no new functionality will be added to this module.
+Only bug fixes and documentation corrections/additions. All new efforts
+will be directed towards the rewrite of this distribution, B<DBIx::HTML>.
+
+This distribution features a more flexible interface with fewer methods and
+logically named argument parameters. At the core is an HTML attribute generator:
+
+=over 4
+
+=item * L<Tie::Hash::Attribute>
+
+=back
+
+Which is used by an HTML tag generator:
+
+=over 4
+
+=item * L<HTML::AutoTag>
+
+=back
+
+Which is used by an HTML table generator:
+
+=over 4
+
+=item * L<Spreadsheet::HTML>
+
+=back
+
+Which is finally wrapped by a DBI extension:
 
 =over 4
 
 =item * L<DBIx::HTML>
-
-=item * L<Spreadsheet::HTML>
 
 =back
 
