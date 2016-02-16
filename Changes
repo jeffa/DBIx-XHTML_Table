@@ -1,6 +1,7 @@
 Revision history for Perl extension DBIx::XHTML_Table.
 
 1.48
+    - fixed bug #111950 (License clarification)
 
 1.47
     - update copyright date
